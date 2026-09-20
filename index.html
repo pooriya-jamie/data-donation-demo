@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta
+      name="description"
+      content="A self-contained visual tour of DataDonate, a participant-controlled data-donation platform for human-subject research. All data shown is synthetic."
+    />
+    <title>DataDonate · Product tour</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Inline icon sprite (Phosphor-style strokes on a 256 grid; no network requests) -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none" aria-hidden="true" focusable="false">
+      <defs>
+        <g id="ico-base" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"></g>
+      </defs>
+      <symbol id="icon-check" viewBox="0 0 256 256"><polyline points="40 144 96 200 224 72" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="icon-check-circle" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96" fill="currentColor" fill-opacity=".14"/><polyline points="84 132 112 160 172 100"/></g></symbol>
+      <symbol id="icon-x-circle" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96" fill="currentColor" fill-opacity=".14"/><line x1="160" y1="96" x2="96" y2="160"/><line x1="96" y1="96" x2="160" y2="160"/></g></symbol>
+      <symbol id="icon-x" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round"><line x1="200" y1="56" x2="56" y2="200"/><line x1="56" y1="56" x2="200" y2="200"/></g></symbol>
+      <symbol id="icon-warning-circle" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96" fill="currentColor" fill-opacity=".14"/><line x1="128" y1="80" x2="128" y2="140"/><circle cx="128" cy="176" r="10" fill="currentColor" stroke="none"/></g></symbol>
+      <symbol id="icon-info" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96" fill="currentColor" fill-opacity=".14"/><line x1="128" y1="120" x2="128" y2="180"/><circle cx="128" cy="84" r="10" fill="currentColor" stroke="none"/></g></symbol>
+      <symbol id="icon-shield-check" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M40 56v56c0 96 88 128 88 128s88-32 88-128V56Z" fill="currentColor" fill-opacity=".14"/><polyline points="88 128 116 156 168 104"/></g></symbol>
+      <symbol id="icon-database" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="128" cy="80" rx="80" ry="32" fill="currentColor" fill-opacity=".14"/><path d="M48 80v96c0 17.7 35.8 32 80 32s80-14.3 80-32V80"/><path d="M48 128c0 17.7 35.8 32 80 32s80-14.3 80-32"/></g></symbol>
+      <symbol id="icon-hard-drives" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="32" y="40" width="192" height="64" rx="8" fill="currentColor" fill-opacity=".14"/><rect x="32" y="152" width="192" height="64" rx="8" fill="currentColor" fill-opacity=".14"/><circle cx="184" cy="72" r="8" fill="currentColor" stroke="none"/><circle cx="184" cy="184" r="8" fill="currentColor" stroke="none"/></g></symbol>
+      <symbol id="icon-cloud" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M76 200a44 44 0 0 1 4-87.8A72 72 0 0 1 216 120a40 40 0 0 1-8 80Z" fill="currentColor" fill-opacity=".14"/></g></symbol>
+      <symbol id="icon-gauge" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M32 176a96 96 0 1 1 192 0" fill="currentColor" fill-opacity=".14"/><line x1="128" y1="176" x2="172" y2="108"/><circle cx="128" cy="176" r="12" fill="currentColor" stroke="none"/></g></symbol>
+      <symbol id="icon-squares-four" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linejoin="round"><rect x="48" y="48" width="64" height="64" rx="8" fill="currentColor" fill-opacity=".14"/><rect x="144" y="48" width="64" height="64" rx="8" fill="currentColor" fill-opacity=".14"/><rect x="48" y="144" width="64" height="64" rx="8" fill="currentColor" fill-opacity=".14"/><rect x="144" y="144" width="64" height="64" rx="8" fill="currentColor" fill-opacity=".14"/></g></symbol>
+      <symbol id="icon-users" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="96" cy="96" r="40" fill="currentColor" fill-opacity=".14"/><path d="M24 200a72 72 0 0 1 144 0"/><path d="M168 64a40 40 0 0 1 0 64"/><path d="M184 136a72 72 0 0 1 48 64"/></g></symbol>
+      <symbol id="icon-sliders" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"><line x1="40" y1="72" x2="216" y2="72"/><circle cx="92" cy="72" r="16" fill="currentColor" fill-opacity=".14"/><line x1="40" y1="128" x2="216" y2="128"/><circle cx="156" cy="128" r="16" fill="currentColor" fill-opacity=".14"/><line x1="40" y1="184" x2="216" y2="184"/><circle cx="108" cy="184" r="16" fill="currentColor" fill-opacity=".14"/></g></symbol>
+      <symbol id="icon-rocket" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M128 24c40 32 56 80 56 136l32 40H40l32-40c0-56 16-104 56-136Z" fill="currentColor" fill-opacity=".14"/><circle cx="128" cy="112" r="20"/><line x1="104" y1="200" x2="104" y2="232"/><line x1="152" y1="200" x2="152" y2="232"/></g></symbol>
+      <symbol id="icon-clock-ccw" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96" fill="currentColor" fill-opacity=".14"/><polyline points="128 72 128 128 176 152"/></g></symbol>
+      <symbol id="icon-list-checks" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><polyline points="40 64 56 80 88 48"/><line x1="120" y1="64" x2="216" y2="64"/><polyline points="40 128 56 144 88 112"/><line x1="120" y1="128" x2="216" y2="128"/><polyline points="40 192 56 208 88 176"/><line x1="120" y1="192" x2="216" y2="192"/></g></symbol>
+      <symbol id="icon-file-zip" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M56 24h96l56 56v152H56Z" fill="currentColor" fill-opacity=".14"/><polyline points="152 24 152 80 208 80"/><line x1="100" y1="112" x2="124" y2="112"/><line x1="100" y1="144" x2="124" y2="144"/><line x1="100" y1="176" x2="124" y2="176"/></g></symbol>
+      <symbol id="icon-file-up" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M56 24h96l56 56v152H56Z" fill="currentColor" fill-opacity=".14"/><polyline points="152 24 152 80 208 80"/><line x1="128" y1="196" x2="128" y2="124"/><polyline points="100 152 128 124 156 152"/></g></symbol>
+      <symbol id="icon-search" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"><circle cx="112" cy="112" r="72" fill="currentColor" fill-opacity=".14"/><line x1="168" y1="168" x2="224" y2="224"/></g></symbol>
+      <symbol id="icon-calendar" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="40" y="48" width="176" height="168" rx="8" fill="currentColor" fill-opacity=".14"/><line x1="40" y1="96" x2="216" y2="96"/><line x1="88" y1="32" x2="88" y2="64"/><line x1="168" y1="32" x2="168" y2="64"/></g></symbol>
+      <symbol id="icon-arrow-right" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"><line x1="40" y1="128" x2="216" y2="128"/><polyline points="144 56 216 128 144 200"/></g></symbol>
+      <symbol id="icon-arrow-left" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"><line x1="216" y1="128" x2="40" y2="128"/><polyline points="112 56 40 128 112 200"/></g></symbol>
+      <symbol id="icon-lock" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="40" y="104" width="176" height="120" rx="12" fill="currentColor" fill-opacity=".14"/><path d="M88 104V72a40 40 0 0 1 80 0v32"/><circle cx="128" cy="160" r="14" fill="currentColor" stroke="none"/></g></symbol>
+      <symbol id="icon-cpu" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="64" y="64" width="128" height="128" rx="8" fill="currentColor" fill-opacity=".14"/><rect x="104" y="104" width="48" height="48"/><line x1="104" y1="64" x2="104" y2="32"/><line x1="152" y1="64" x2="152" y2="32"/><line x1="104" y1="192" x2="104" y2="224"/><line x1="152" y1="192" x2="152" y2="224"/><line x1="64" y1="104" x2="32" y2="104"/><line x1="64" y1="152" x2="32" y2="152"/><line x1="192" y1="104" x2="224" y2="104"/><line x1="192" y1="152" x2="224" y2="152"/></g></symbol>
+      <symbol id="icon-eye" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M128 56C48 56 16 128 16 128s32 72 112 72 112-72 112-72-32-72-112-72Z" fill="currentColor" fill-opacity=".14"/><circle cx="128" cy="128" r="32"/></g></symbol>
+      <symbol id="icon-eye-slash" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M128 56C48 56 16 128 16 128s32 72 112 72 112-72 112-72-32-72-112-72Z"/><circle cx="128" cy="128" r="32"/><line x1="48" y1="40" x2="208" y2="216"/></g></symbol>
+      <symbol id="icon-download" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><line x1="128" y1="32" x2="128" y2="152"/><polyline points="80 104 128 152 176 104"/><path d="M40 160v40a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16v-40"/></g></symbol>
+      <symbol id="icon-flag" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M40 216V48h176l-32 48 32 48H40" fill="currentColor" fill-opacity=".14"/></g></symbol>
+      <symbol id="icon-clipboard" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="56" y="48" width="144" height="176" rx="8" fill="currentColor" fill-opacity=".14"/><rect x="96" y="32" width="64" height="32" rx="8" fill="#fff"/><line x1="96" y1="128" x2="160" y2="128"/><line x1="96" y1="168" x2="160" y2="168"/></g></symbol>
+      <symbol id="icon-envelope" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="24" y="56" width="208" height="144" rx="8" fill="currentColor" fill-opacity=".14"/><polyline points="24 64 128 144 232 64"/></g></symbol>
+      <symbol id="icon-folder" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M32 200V64a8 8 0 0 1 8-8h64l24 24h96a8 8 0 0 1 8 8v24"/><path d="M32 200l24-88h176l-24 88Z" fill="currentColor" fill-opacity=".14"/></g></symbol>
+      <symbol id="icon-id-card" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="24" y="56" width="208" height="144" rx="12" fill="currentColor" fill-opacity=".14"/><circle cx="88" cy="116" r="22"/><path d="M52 172a36 36 0 0 1 72 0"/><line x1="152" y1="104" x2="200" y2="104"/><line x1="152" y1="144" x2="200" y2="144"/></g></symbol>
+      <symbol id="icon-chat" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M32 48h192v128h-72l-24 32-24-32H32Z" fill="currentColor" fill-opacity=".14"/><line x1="88" y1="96" x2="168" y2="96"/><line x1="88" y1="128" x2="168" y2="128"/></g></symbol>
+      <symbol id="icon-list" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round"><line x1="40" y1="64" x2="216" y2="64"/><line x1="40" y1="128" x2="216" y2="128"/><line x1="40" y1="192" x2="216" y2="192"/></g></symbol>
+      <symbol id="icon-lightning" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linejoin="round"><path d="M152 24 40 144h72l-8 88 112-120h-72Z" fill="currentColor" fill-opacity=".14"/></g></symbol>
+      <symbol id="icon-sign-out" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M112 216H48a8 8 0 0 1-8-8V48a8 8 0 0 1 8-8h64"/><line x1="112" y1="128" x2="224" y2="128"/><polyline points="176 80 224 128 176 176"/></g></symbol>
+      <symbol id="icon-key" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="88" cy="168" r="48" fill="currentColor" fill-opacity=".14"/><line x1="122" y1="134" x2="216" y2="40"/><line x1="184" y1="72" x2="208" y2="96"/><line x1="160" y1="96" x2="184" y2="120"/></g></symbol>
+      <symbol id="icon-trash" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><line x1="40" y1="56" x2="216" y2="56"/><path d="M64 56v152a16 16 0 0 0 16 16h96a16 16 0 0 0 16-16V56" fill="currentColor" fill-opacity=".14"/><path d="M96 56V32h64v24"/><line x1="104" y1="104" x2="104" y2="176"/><line x1="152" y1="104" x2="152" y2="176"/></g></symbol>
+      <symbol id="icon-globe" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"><circle cx="128" cy="128" r="96" fill="currentColor" fill-opacity=".14"/><ellipse cx="128" cy="128" rx="40" ry="96"/><line x1="32" y1="128" x2="224" y2="128"/></g></symbol>
+      <symbol id="icon-play" viewBox="0 0 256 256"><path d="M72 40l152 88-152 88Z" fill="currentColor"/></symbol>
+      <symbol id="icon-skip" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M56 48l120 80-120 80Z" fill="currentColor"/><line x1="200" y1="48" x2="200" y2="208"/></g></symbol>
+      <symbol id="icon-reset" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M52 100A88 88 0 1 1 40 156"/><polyline points="24 64 52 100 92 88"/></g></symbol>
+      <symbol id="icon-mobile" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="64" y="24" width="128" height="208" rx="16" fill="currentColor" fill-opacity=".14"/><line x1="112" y1="200" x2="144" y2="200"/></g></symbol>
+      <symbol id="icon-browser" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="32" y="48" width="192" height="160" rx="8" fill="currentColor" fill-opacity=".14"/><line x1="32" y1="96" x2="224" y2="96"/><circle cx="64" cy="72" r="6" fill="currentColor" stroke="none"/><circle cx="88" cy="72" r="6" fill="currentColor" stroke="none"/></g></symbol>
+      <symbol id="icon-user-circle" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96" fill="currentColor" fill-opacity=".14"/><circle cx="128" cy="112" r="36"/><path d="M64 208a72 72 0 0 1 128 0"/></g></symbol>
+      <symbol id="icon-receipt" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M40 216V40l24 16 24-16 24 16 24-16 24 16 24-16 24 16 24-16v176l-24-16-24 16-24-16-24 16-24-16-24 16-24-16Z" fill="currentColor" fill-opacity=".14"/><line x1="88" y1="104" x2="168" y2="104"/><line x1="88" y1="144" x2="168" y2="144"/></g></symbol>
+      <symbol id="icon-question" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><circle cx="128" cy="128" r="96" fill="currentColor" fill-opacity=".14"/><path d="M96 100a32 32 0 1 1 44 30c-8 4-12 10-12 18v8"/><circle cx="128" cy="180" r="10" fill="currentColor" stroke="none"/></g></symbol>
+      <symbol id="icon-pencil" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M96 216H40v-56L168 32l56 56Z" fill="currentColor" fill-opacity=".14"/><line x1="136" y1="64" x2="192" y2="120"/></g></symbol>
+      <symbol id="icon-pause" viewBox="0 0 256 256"><g fill="currentColor"><rect x="64" y="40" width="40" height="176" rx="6"/><rect x="152" y="40" width="40" height="176" rx="6"/></g></symbol>
+      <symbol id="icon-link" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M104 152 72 184a40 40 0 0 1-56-56l40-40a40 40 0 0 1 56 0"/><path d="M152 104l32-32a40 40 0 0 1 56 56l-40 40a40 40 0 0 1-56 0"/></g></symbol>
+      <symbol id="icon-stack" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M32 88 128 40l96 48-96 48Z" fill="currentColor" fill-opacity=".14"/><polyline points="32 128 128 176 224 128"/><polyline points="32 168 128 216 224 168"/></g></symbol>
+      <symbol id="icon-money" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><rect x="24" y="64" width="208" height="128" rx="8" fill="currentColor" fill-opacity=".14"/><circle cx="128" cy="128" r="32"/><line x1="56" y1="96" x2="56" y2="96"/><line x1="200" y1="160" x2="200" y2="160"/></g></symbol>
+      <symbol id="icon-hourglass" viewBox="0 0 256 256"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"><path d="M64 32h128v40l-48 56 48 56v40H64v-40l48-56-48-56Z" fill="currentColor" fill-opacity=".14"/></g></symbol>
+    </svg>
+
+    <a href="#main" class="skip-link">Skip to content</a>
+
+    <header class="tour-top" id="tour-top">
+      <div class="tour-top-inner">
+        <a class="tour-brand" href="#overview" data-action="nav" data-to="overview">
+          <span class="brand-mark" aria-hidden="true">D</span>
+          <span class="brand-text">
+            <span class="brand-name">DataDonate</span>
+            <span class="brand-sub">UCLA CSS Lab · Product tour</span>
+          </span>
+        </a>
+        <nav class="tour-nav" id="tour-nav" aria-label="Tour sections">
+          <a class="tour-link" href="#overview" data-view="overview"><span class="tour-num">1</span>Overview</a>
+          <a class="tour-link" href="#participant" data-view="participant"><span class="tour-num">2</span>Participant</a>
+          <a class="tour-link" href="#server" data-view="server"><span class="tour-num">3</span>After donating</a>
+          <a class="tour-link" href="#admin" data-view="admin"><span class="tour-num">4</span>Research team</a>
+          <a class="tour-link" href="#architecture" data-view="architecture"><span class="tour-num">5</span>Where data goes</a>
+        </nav>
+        <div class="tour-actions">
+          <span class="demo-badge" title="Every name, participant, donation and record on this page is fictitious.">
+            <svg class="ico ico-sm" aria-hidden="true"><use href="#icon-info"></use></svg>
+            Demo<span class="long"> · synthetic data</span>
+          </span>
+          <button type="button" class="btn btn-ghost btn-sm" data-action="reset-demo" title="Return every view to its starting state">
+            <svg class="ico ico-sm" aria-hidden="true"><use href="#icon-reset"></use></svg>
+            <span class="reset-label">Reset demo</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ============================================================ -->
+      <!-- 1 · Overview                                                  -->
+      <!-- ============================================================ -->
+      <section class="view" id="view-overview" aria-labelledby="overview-title" hidden>
+        <div class="view-inner">
+          <div class="hero">
+            <div class="hero-copy">
+              <span class="eyebrow">DataDonate · a short tour</span>
+              <h1 id="overview-title" tabindex="-1">Donate your app activity to research, on your own terms</h1>
+              <p class="lede">
+                People download their own data from apps like TikTok or YouTube, open it privately on their own
+                device, pick what to share, and see exactly what will be sent before anything leaves. Research teams
+                set the rules in advance and cannot change them quietly.
+              </p>
+              <ul class="hero-facts">
+                <li>Your raw file never leaves your device</li>
+                <li>You see exactly what is sent</li>
+                <li>The rules are locked before you start</li>
+                <li>No names, no emails</li>
+              </ul>
+              <div class="btn-row">
+                <a class="btn btn-primary" href="#participant">Try it as a participant <svg class="ico" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></a>
+                <a class="btn btn-secondary" href="#admin">See the research team's side</a>
+              </div>
+            </div>
+            <div class="hero-visual">
+              <div class="flow-glance" aria-label="How a donation flows">
+                <div class="flow-glance-head">
+                  <strong>One donation, step by step</strong>
+                  <span class="pill tile-badge">5 steps · about 20 minutes</span>
+                </div>
+                <div class="flow-steps">
+                  <div class="flow-divider">On your device</div>
+                  <div class="flow-step is-device">
+                    <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-file-zip"></use></svg></span>
+                    <div><strong>Get your data file</strong><span>The app's own "download my data" file, unchanged</span></div>
+                    <span class="flow-where">You</span>
+                  </div>
+                  <div class="flow-step is-device">
+                    <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-cpu"></use></svg></span>
+                    <div><strong>Your browser opens it privately</strong><span>Only the parts this study allows are kept. The rest is dropped</span></div>
+                    <span class="flow-where">Device</span>
+                  </div>
+                  <div class="flow-step is-device">
+                    <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-list-checks"></use></svg></span>
+                    <div><strong>Choose and review</strong><span>Pick groups, dates and details. Then see the exact list that will be sent</span></div>
+                    <span class="flow-where">You</span>
+                  </div>
+                  <div class="flow-divider">On the research server</div>
+                  <div class="flow-step is-server">
+                    <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-shield-check"></use></svg></span>
+                    <div><strong>Checks before accepting</strong><span>Is this study allowed to collect this? Is the file exactly what you reviewed?</span></div>
+                    <span class="flow-where">Server</span>
+                  </div>
+                  <div class="flow-step is-server">
+                    <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-lock"></use></svg></span>
+                    <div><strong>Locked away, encrypted</strong><span>Stored under a code, not your name. You get a receipt</span></div>
+                    <span class="flow-where">Storage</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <h2>What the platform promises</h2>
+            <p>Each promise is built into the software, not just written in a form.</p>
+          </div>
+          <div class="guarantee-grid">
+            <article class="card guarantee">
+              <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-cpu"></use></svg></span>
+              <h3>Your file stays on your device</h3>
+              <p>The export is opened in your browser. Parts the study never collects are dropped before you even see them.</p>
+            </article>
+            <article class="card guarantee">
+              <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-eye"></use></svg></span>
+              <h3>You see exactly what is sent</h3>
+              <p>The list you review is the same data that is uploaded. The server double-checks that nothing changed on the way.</p>
+            </article>
+            <article class="card guarantee">
+              <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-rocket"></use></svg></span>
+              <h3>Study rules are locked</h3>
+              <p>What a study may collect, how long it keeps data and how it deletes it are published once. Changing them means asking you again.</p>
+            </article>
+            <article class="card guarantee">
+              <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-stack"></use></svg></span>
+              <h3>Studies are walled off</h3>
+              <p>One study can never see another study's participants or data, even on the same website.</p>
+            </article>
+            <article class="card guarantee">
+              <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-user-circle"></use></svg></span>
+              <h3>No names, no emails</h3>
+              <p>You take part through a private link and a code. If you give an email for reminders, it is kept apart and never becomes research data.</p>
+            </article>
+            <article class="card guarantee">
+              <span class="flow-step-icon"><svg class="ico" aria-hidden="true"><use href="#icon-trash"></use></svg></span>
+              <h3>Deleting takes two people</h3>
+              <p>Withdrawing cuts off access at once. Erasing the data needs one staff member to propose it and a different one to approve it.</p>
+            </article>
+          </div>
+
+          <div class="section-title">
+            <h2>Three layers, each one only narrower</h2>
+            <p>
+              The software can only read certain things. Each study may allow only some of those. You may share only
+              some of what the study allows. Pick a service to see it.
+            </p>
+          </div>
+          <div id="ceilings-widget"></div>
+
+          <div class="section-title">
+            <h2>Ready</h2>
+            <p>Only services the team has checked accept uploads. Some show instructions only. This study uses three of them.</p>
+          </div>
+          <div id="sources-strip" class="sources-strip"></div>
+
+          <div class="section-title">
+            <h2>Who it is for</h2>
+          </div>
+          <div class="audience-grid">
+            <article class="card">
+              <h3>Participants</h3>
+              <ul>
+                <li>Plain steps, one decision at a time</li>
+                <li>Never asked for a name</li>
+                <li>See counts first; details only if you want</li>
+                <li>Withdraw any time; earned payment stays</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>Research teams</h3>
+              <ul>
+                <li>Run several studies in one place</li>
+                <li>Set services, rounds and consent per study</li>
+                <li>See progress without seeing raw data</li>
+                <li>Every download is logged</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>Ethics boards</h3>
+              <ul>
+                <li>Every promise to participants is published and locked</li>
+                <li>An incomplete setup cannot go live</li>
+                <li>Data is kept and deleted on schedule</li>
+                <li>A full record of who did what, per study</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="card tour-next">
+            <div><strong>Next: try it as a participant</strong><p>Five screens, a sample data file, and a live check that shows when anything changes.</p></div>
+            <a class="btn btn-primary" href="#participant">Continue <svg class="ico" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 2 · Participant journey                                       -->
+      <!-- ============================================================ -->
+      <section class="view" id="view-participant" aria-labelledby="participant-title" hidden>
+        <div class="view-inner wide">
+          <div class="view-head">
+            <span class="eyebrow">2 · As a participant</span>
+            <h1 id="participant-title" tabindex="-1">Five screens, start to finish</h1>
+            <p class="lede">
+              The real screens with a sample data file made on this page. Nothing is uploaded anywhere. Change a
+              choice and watch the fingerprint update.
+            </p>
+          </div>
+          <div class="journey-layout">
+            <div class="device" aria-label="Participant browser window">
+              <div class="device-chrome">
+                <span class="device-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="device-url" id="device-url"><span class="device-lock"><svg class="ico ico-sm" aria-hidden="true"><use href="#icon-lock"></use></svg></span> datadonate.example<b>/p/screen-exposure-2026/join</b></span>
+              </div>
+              <div class="device-screen" id="device-screen"></div>
+            </div>
+            <aside class="card tour-notes" id="tour-notes" aria-label="Tour notes"></aside>
+          </div>
+          <div class="card tour-next">
+            <div><strong>Next: what happens after you press Donate</strong><p>Follow the same donation through the server's checks until it is locked away and you get a receipt.</p></div>
+            <a class="btn btn-primary" href="#server">Continue <svg class="ico" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 3 · After you donate                                          -->
+      <!-- ============================================================ -->
+      <section class="view" id="view-server" aria-labelledby="server-title" hidden>
+        <div class="view-inner wide">
+          <div class="view-head">
+            <span class="eyebrow">3 · After you donate</span>
+            <h1 id="server-title" tabindex="-1">The server checks everything before it keeps anything</h1>
+            <p class="lede">
+              Your device sends only a summary sheet and the exact list you reviewed. The server re-checks the rules and
+              the data itself, then locks the file away and sends back a receipt. Press Play to watch.
+            </p>
+          </div>
+          <div class="server-layout">
+            <div>
+              <div class="seq-controls" id="seq-controls"></div>
+              <div class="seq-figure"><div id="seq-figure"></div></div>
+              <details class="seq-log-wrap" style="margin-top: 1rem">
+                <summary>For technical readers: server log</summary>
+                <div class="seq-log" id="seq-log" aria-live="polite" aria-label="Server log"></div>
+              </details>
+            </div>
+            <div>
+              <div class="card" id="seq-facts"></div>
+              <div class="card" style="margin-top: 12px">
+                <h2 style="font-size: 1.05rem">What the server checks</h2>
+                <ol class="seq-checks" id="seq-checks"></ol>
+              </div>
+            </div>
+          </div>
+          <div class="card tour-next">
+            <div><strong>Next: the research team's side</strong><p>Progress at a glance, an emergency pause switch, and publishing a new version of a study.</p></div>
+            <a class="btn btn-primary" href="#admin">Continue <svg class="ico" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 4 · Research team                                             -->
+      <!-- ============================================================ -->
+      <section class="view" id="view-admin" aria-labelledby="admin-title" hidden>
+        <div class="view-inner wide">
+          <div class="view-head">
+            <span class="eyebrow">4 · Research team</span>
+            <h1 id="admin-title" tabindex="-1">One place to run every study</h1>
+            <p class="lede">
+              You are signed in as a study owner. Try <strong>System</strong>: pausing a service changes what participants
+              see right away. Try <strong>Review &amp; publish</strong>: changing what is collected means asking participants again.
+            </p>
+          </div>
+          <div class="admin-frame">
+            <div class="admin-shell" id="admin-shell"></div>
+          </div>
+          <div class="card tour-next">
+            <div><strong>Next: where the data goes</strong><p>The three places data can be, and what happens from invitation to deletion.</p></div>
+            <a class="btn btn-primary" href="#architecture">Continue <svg class="ico" aria-hidden="true"><use href="#icon-arrow-right"></use></svg></a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- 5 · Architecture                                              -->
+      <!-- ============================================================ -->
+      <section class="view" id="view-architecture" aria-labelledby="architecture-title" hidden>
+        <div class="view-inner wide">
+          <div class="view-head">
+            <span class="eyebrow">5 · Where data goes</span>
+            <h1 id="architecture-title" tabindex="-1">Three places, one direction</h1>
+            <p class="lede">
+              The same rules run on your device and on the research server, so nothing slips through in either place.
+              Your raw file has no route to the server at all.
+            </p>
+          </div>
+
+          <div class="arch-figure">
+            <svg class="arch" viewBox="0 0 980 440" role="img" aria-labelledby="arch-title arch-desc">
+              <title id="arch-title">Where the data goes</title>
+              <desc id="arch-desc">Your device, the research server and secure storage. Only a summary and the reviewed list leave the device; the raw file never does.</desc>
+              <defs>
+                <marker id="arch-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+                  <path d="M0 0L10 5 0 10Z" class="arrowhead"/>
+                </marker>
+              </defs>
+              <!-- zones -->
+              <rect class="zone is-device" x="16" y="30" width="290" height="392" rx="16"/>
+              <text class="zone-title" x="32" y="56">Your device</text>
+              <rect class="zone" x="366" y="30" width="278" height="392" rx="16"/>
+              <text class="zone-title" x="382" y="56">Research server</text>
+              <rect class="zone" x="684" y="30" width="280" height="392" rx="16"/>
+              <text class="zone-title" x="700" y="56">Secure storage</text>
+
+              <!-- device nodes -->
+              <rect class="node" x="32" y="76" width="250" height="70" rx="10"/>
+              <text class="node-title" x="48" y="102">The screens you use</text>
+              <text class="node-sub" x="48" y="120">Steps, consent, choices, final review</text>
+              <text class="node-sub" x="48" y="136">Shows summaries and short lists only</text>
+
+              <rect class="node is-accent" x="32" y="166" width="250" height="184" rx="10"/>
+              <text class="node-title" x="48" y="192">Private processing on your device</text>
+              <text class="node-sub" x="48" y="214">1 · Open the data file safely</text>
+              <text class="node-sub" x="48" y="234">2 · Keep only what the app can read</text>
+              <text class="node-sub" x="48" y="254">3 · Drop what this study never collects</text>
+              <text class="node-sub" x="48" y="274">4 · Apply your own choices</text>
+              <text class="node-sub" x="48" y="294">5 · Build the exact list and its fingerprint</text>
+              <text class="node-sub" x="48" y="318">Your raw file, search words and removed</text>
+              <text class="node-sub" x="48" y="334">items never leave this box</text>
+              <text class="edge-label is-blocked" x="32" y="376">Raw file: no path to the server</text>
+              <text class="edge-label is-blocked" x="32" y="392">Only the summary and the reviewed list leave</text>
+
+              <!-- app nodes -->
+              <rect class="node is-dark" x="386" y="76" width="238" height="150" rx="10"/>
+              <text class="node-title on-dark" x="402" y="102">Checks and records</text>
+              <text class="node-sub on-dark" x="402" y="124">Private links and short-lived sessions</text>
+              <text class="node-sub on-dark" x="402" y="142">Re-checks study rules and fingerprints</text>
+              <text class="node-sub on-dark" x="402" y="160">Accepts or rejects each donation</text>
+              <text class="node-sub on-dark" x="402" y="178">The research team's console</text>
+              <text class="node-sub on-dark" x="402" y="204">Never receives raw files</text>
+
+              <rect class="node is-dark" x="386" y="246" width="238" height="116" rx="10"/>
+              <text class="node-title on-dark" x="402" y="272">Background tasks</text>
+              <text class="node-sub on-dark" x="402" y="294">Two-person deletions</text>
+              <text class="node-sub on-dark" x="402" y="312">Keeps and deletes data on schedule</text>
+              <text class="node-sub on-dark" x="402" y="330">Emails, using each study's approved wording</text>
+              <text class="node-sub on-dark" x="402" y="348">Backups and consent receipts</text>
+
+              <!-- infra nodes -->
+              <rect class="node" x="704" y="76" width="240" height="88" rx="10"/>
+              <text class="node-title" x="720" y="102">Records database</text>
+              <text class="node-sub" x="720" y="122">Studies, versions, participants, receipts,</text>
+              <text class="node-sub" x="720" y="138">audit trail · walled off per study</text>
+              <text class="node-sub" x="720" y="154">No donated files are kept here</text>
+
+              <rect class="node" x="704" y="180" width="240" height="120" rx="10"/>
+              <text class="node-title" x="720" y="206">Encrypted file storage</text>
+              <text class="node-sub" x="720" y="228">Temporary upload slot (15 minutes, exact size)</text>
+              <text class="node-sub" x="720" y="246">Then one permanent, locked copy per donation</text>
+              <text class="node-sub" x="720" y="264">Filed under the study, never overwritten</text>
+              <text class="node-sub" x="720" y="286">Deleted only through approved, recorded jobs</text>
+
+              <rect class="node" x="704" y="316" width="240" height="46" rx="10"/>
+              <text class="node-title" x="720" y="338">Email relay</text>
+              <text class="node-sub" x="720" y="354">Sends only. Wording comes from the study, not the server</text>
+
+              <!-- edges -->
+              <path class="edge" d="M282 110 H386" marker-end="url(#arch-arrow)"/>
+              <text class="edge-label" x="334" y="96" text-anchor="middle">summary +</text>
+              <text class="edge-label" x="334" y="107" text-anchor="middle">fingerprint</text>
+              <path class="edge" d="M282 240 H386" marker-end="url(#arch-arrow)"/>
+              <text class="edge-label" x="334" y="228" text-anchor="middle">"done"</text>
+              <path class="edge" d="M282 300 H352 V398 H956 V240 H948" marker-end="url(#arch-arrow)"/>
+              <text class="edge-label" x="600" y="391" text-anchor="middle">the exact reviewed list → temporary slot, straight into storage</text>
+              <path class="edge" d="M624 120 H704" marker-end="url(#arch-arrow)"/>
+              <path class="edge" d="M624 200 H704" marker-end="url(#arch-arrow)"/>
+              <path class="edge" d="M624 290 H704" marker-end="url(#arch-arrow)"/>
+              <path class="edge" d="M624 340 H704" marker-end="url(#arch-arrow)"/>
+              <!-- blocked edge -->
+              <path class="edge is-blocked" d="M282 330 H314"/>
+              <line class="edge is-blocked" x1="318" y1="320" x2="338" y2="340"/>
+              <line class="edge is-blocked" x1="338" y1="320" x2="318" y2="340"/>
+            </svg>
+          </div>
+
+          <div class="section-title">
+            <h2>Three rules that never bend</h2>
+          </div>
+          <div class="iso-grid">
+            <article class="card">
+              <h3><svg class="ico" aria-hidden="true"><use href="#icon-stack"></use></svg>Studies are walled off</h3>
+              <ul>
+                <li>Every record is tagged with its study. The database refuses links between studies.</li>
+                <li>A private link only works for the study it was made for.</li>
+                <li>A wrong link and an expired link get the same plain error, so nothing leaks.</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3><svg class="ico" aria-hidden="true"><use href="#icon-rocket"></use></svg>Rules cannot change quietly</h3>
+              <ul>
+                <li>What a study collects, how long it keeps data, how it deletes it and how it pays are published together as one locked version.</li>
+                <li>Every request re-checks that the version is still the same one.</li>
+                <li>Changing any of those terms creates a new version and asks participants again.</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3><svg class="ico" aria-hidden="true"><use href="#icon-user-circle"></use></svg>A code, not a name</h3>
+              <ul>
+                <li>Participants join through a private link. No account, no password.</li>
+                <li>Sessions are short-lived and checked on every request.</li>
+                <li>An optional email for reminders is stored apart and never becomes research data.</li>
+              </ul>
+            </article>
+          </div>
+
+          <div class="section-title">
+            <h2>One participant, start to finish</h2>
+            <p>Every date comes from the study's published rules.</p>
+          </div>
+          <div class="card">
+            <ol class="lifecycle">
+              <li><span class="lc-dot">1</span><strong>Invited</strong><span>A private link, shown once to the research team and sent to the participant</span></li>
+              <li><span class="lc-dot">2</span><strong>Consented</strong><span>Read, answer, sign. Tied to this version of the study</span></li>
+              <li><span class="lc-dot">3</span><strong>Ready to donate</strong><span>One donation per service, per round</span></li>
+              <li><span class="lc-dot">4</span><strong>Donated</strong><span>Checked, locked away, receipt issued</span></li>
+              <li><span class="lc-dot">5</span><strong>Withdrawn (optional)</strong><span>Access ends at once; the deletion clock starts</span></li>
+              <li><span class="lc-dot">6</span><strong>Time to delete</strong><span>The schedule in the study's rules comes due</span></li>
+              <li class="is-end"><span class="lc-dot">7</span><strong>Deleted</strong><span>Proposed by one person, approved by another, recorded</span></li>
+            </ol>
+          </div>
+
+          <div class="card tour-next">
+            <div><strong>That is the tour.</strong><p>Go back and try a different service as a participant, or publish a new study version as the research team.</p></div>
+            <div class="btn-row">
+              <a class="btn btn-secondary" href="#participant">As a participant</a>
+              <a class="btn btn-primary" href="#admin">Research team</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="dialog" id="dlg" aria-labelledby="dlg-title">
+      <form method="dialog" id="dlg-form">
+        <div class="dialog-head"><h2 id="dlg-title"></h2></div>
+        <div class="dialog-body" id="dlg-body"></div>
+        <div class="dialog-actions" id="dlg-actions"></div>
+      </form>
+    </dialog>
+
+    <div class="undo-toast" id="toast" role="status" aria-live="polite">
+      <span id="toast-text"></span>
+      <button type="button" class="link-btn" id="toast-action" hidden></button>
+    </div>
+
+    <script src="engine.js"></script>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+    <script src="views-tour.js"></script>
+    <script src="views-participant.js"></script>
+    <script src="views-admin.js"></script>
+  </body>
+</html>
