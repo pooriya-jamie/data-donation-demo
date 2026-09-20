@@ -397,7 +397,7 @@
     const change = kind === 'consent'
       ? { section: 'Consent', summary: 'Consent wording updated: clarified the retention period and added the ChatGPT example (document ' + bumpVersion(rel.consentVersion) + ').', material: true }
       : kind === 'contact'
-        ? { section: 'Project setup', summary: 'Coordinator contact changed to study-team@css-lab.example. Contact-only change; consent stays valid.', material: false }
+        ? { section: 'Project setup', summary: 'Coordinator contact changed to study-team@oasislab.example. Contact-only change; consent stays valid.', material: false }
         : { section: 'Participant guides', summary: 'YouTube guide step 3 wording refreshed against the current Takeout layout.', material: false };
     if (A.release.draftChanges.some((c) => c.summary === change.summary)) return App.toast('That draft change is already listed.');
     A.release.draftChanges.push(change);
@@ -438,7 +438,7 @@
       requiresReconsent: material,
       consentVersion: material ? A.release.consentVersionDraft : rel.consentVersion,
       sourcePolicies: rel.sourcePolicies,
-      material: Object.assign({}, rel.material, { consentVersion: material ? A.release.consentVersionDraft : rel.consentVersion, contact: changes.some((c) => c.section === 'Project setup') ? 'study-team@css-lab.example' : undefined }),
+      material: Object.assign({}, rel.material, { consentVersion: material ? A.release.consentVersionDraft : rel.consentVersion, contact: changes.some((c) => c.section === 'Project setup') ? 'study-team@oasislab.example' : undefined }),
       changes: changes.slice(),
     };
     rel.status = 'superseded';

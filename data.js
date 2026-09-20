@@ -427,7 +427,7 @@ window.DEMO_DATA = (function () {
       id: 'prj_a4f1e2',
       slug: 'screen-exposure-2026',
       name: 'Screen Exposure and Wellbeing 2026',
-      institution: 'UCLA CSS Lab',
+      institution: 'OASIS Lab',
       purpose:
         'This study looks at how the videos and posts people encounter on everyday apps relate to self-reported wellbeing over time.',
       governanceStatus: 'approved',
@@ -438,7 +438,7 @@ window.DEMO_DATA = (function () {
       visibility: 'unlisted',
       timezone: 'America/Los_Angeles',
       activeReleaseId: 'rel_v2',
-      coordinatorEmail: 'coordinator@css-lab.example',
+      coordinatorEmail: 'coordinator@oasislab.example',
       estimatedMinutes: 20,
       donationsCloseAt: '2026-12-15T23:59:00-08:00',
       participantAccessEndsAt: '2027-01-15T23:59:00-08:00',
@@ -453,7 +453,7 @@ window.DEMO_DATA = (function () {
       id: 'prj_b7c209',
       slug: 'assistant-diaries-2026',
       name: 'Conversational AI in Everyday Life',
-      institution: 'UCLA CSS Lab',
+      institution: 'OASIS Lab',
       purpose: 'A diary-style study of how people use AI assistants for everyday tasks.',
       governanceStatus: 'pending',
       governanceReference: 'DEMO-IRB-2026-077',
@@ -461,7 +461,7 @@ window.DEMO_DATA = (function () {
       visibility: 'unlisted',
       timezone: 'America/Los_Angeles',
       activeReleaseId: null,
-      coordinatorEmail: 'diaries@css-lab.example',
+      coordinatorEmail: 'diaries@oasislab.example',
       communicationMode: 'external',
       compensation: { mode: 'none', amountCents: 0, currency: 'USD' },
       retention: { anchor: 'project_close', days: 730 },
@@ -707,7 +707,7 @@ window.DEMO_DATA = (function () {
     version: '2.0',
     summary: {
       purpose:
-        'Researchers at UCLA CSS Lab are studying how the videos, posts and searches people encounter on everyday apps relate to wellbeing over time.',
+        'Researchers at OASIS Lab are studying how the videos, posts and searches people encounter on everyday apps relate to wellbeing over time.',
       whatYouShare:
         'Only the activity groups approved for this project: when you watched or liked videos, when you searched, public links to that content, and (only if you turn it on) the words you searched for. Titles, messages, profiles and account details are never collected.',
       risks:
@@ -718,14 +718,14 @@ window.DEMO_DATA = (function () {
         'You can request withdrawal and deletion while your data remain identifiable to the study, in the app or by contacting the coordinator. Deletion is completed within 30 business days.',
     },
     paragraphs: [
-      'You are being asked to take part in a research study conducted by UCLA CSS Lab. Please read this document carefully. It explains what the study involves and what happens to the information you choose to donate.',
+      'You are being asked to take part in a research study conducted by OASIS Lab. Please read this document carefully. It explains what the study involves and what happens to the information you choose to donate.',
       'The study asks you to request a copy of your own activity from one or more apps or online services, open that file in the DataDonate application on your own device, and donate only the activity groups you choose. Your original file never leaves your device.',
       'This project may collect: the dates and times of videos you watched or liked, the dates of searches you made, canonical public links to that content, and, only when you switch it on, the words you searched for. The application removes every other part of your export before you can even see it.',
       'The study never collects profile or account details, contact information, direct messages, comments, followers, login or device history, purchases, advertising records, or the titles of videos you watched.',
       'Donated records are stored under a pseudonymous participant identifier in encrypted research storage. The research team can decrypt research payloads; this is not end-to-end encryption. Your optional contact email is encrypted separately and is never part of research data.',
       'You may withdraw at any time during the identifiable data-collection period. Withdrawal immediately ends your access and starts a deletion request that is completed within 30 business days. Compensation already earned is not affected.',
       'De-identified research data are retained for 365 days after the collection round closes and are then deleted according to the approved data-management plan.',
-      'If you have questions about this study, contact the research coordinator at coordinator@css-lab.example. By continuing you confirm you have read this document, that your questions were answered, and that you agree to take part.',
+      'If you have questions about this study, contact the research coordinator at coordinator@oasislab.example. By continuing you confirm you have read this document, that your questions were answered, and that you agree to take part.',
     ],
     questions: [
       {
