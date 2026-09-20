@@ -326,7 +326,7 @@ window.DEMO_DATA = (function () {
         {
           id: 'conversations',
           label: 'Conversation details',
-          description: 'One entry per conversation: when it happened and how many messages it has. The title is off unless you turn it on.',
+          description: 'One entry per conversation: when it happened and how many messages it has.',
           supportsConversations: true,
           fields: [
             field('timestamp', 'Date the conversation started', 'When the conversation was created.', 'low', true, true),
@@ -337,11 +337,11 @@ window.DEMO_DATA = (function () {
         {
           id: 'prompts',
           label: 'Things you wrote to ChatGPT',
-          description: 'Your own messages. This is your writing, so nothing is shared unless you turn it on.',
+          description: 'Your own messages to ChatGPT. You can leave out any conversation or message.',
           supportsConversations: true,
           fields: [
             field('timestamp', 'Date and time', 'When you sent each message.', 'low', true, true),
-            field('text', 'The message text', 'The words you wrote. Off unless you turn it on.', 'high', false, false, true),
+            field('text', 'The message text', 'The words you wrote.', 'high', false, false, true),
           ],
         },
         {
@@ -351,7 +351,7 @@ window.DEMO_DATA = (function () {
           supportsConversations: true,
           fields: [
             field('timestamp', 'Date and time', 'When each reply was sent.', 'low', true, true),
-            field('text', 'The reply text', "ChatGPT's words. Off unless you turn it on.", 'high', false, false, true),
+            field('text', 'The reply text', "ChatGPT's words.", 'high', false, false, true),
           ],
         },
       ],
