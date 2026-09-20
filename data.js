@@ -367,7 +367,8 @@ window.DEMO_DATA = (function () {
       ],
       unsupported: [],
       presets: [
-        { id: 'activity_only', label: 'Activity only', description: 'Conversation dates and message counts. No titles, prompts, or replies.', recommended: true, includesSensitiveText: false, off: [] },
+        { id: 'full_conversations', label: 'Conversations and messages', description: "Conversation dates, message counts, what you wrote and ChatGPT's replies. Titles stay out.", recommended: true, includesSensitiveText: true, off: [] },
+        { id: 'activity_only', label: 'Activity only', description: 'Conversation dates and message counts. No message text.', recommended: false, includesSensitiveText: false, off: [['prompts', 'text'], ['responses', 'text']] },
       ],
     },
     instagram: {
@@ -513,8 +514,8 @@ window.DEMO_DATA = (function () {
       required: false,
       categories: [
         { id: 'conversations', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('messageCount', 'optional', true), fieldPolicy('title', 'prohibited')] },
-        { id: 'prompts', enabled: false, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('text', 'prohibited')] },
-        { id: 'responses', enabled: false, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('text', 'prohibited')] },
+        { id: 'prompts', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('text', 'optional', true)] },
+        { id: 'responses', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('text', 'optional', true)] },
       ],
     },
     { sourceId: 'instagram', mode: 'guide_only', required: false, categories: [] },
@@ -569,7 +570,7 @@ window.DEMO_DATA = (function () {
         deletion: { slaDays: 30, slaUnit: 'business_days' },
       },
       changes: [
-        { section: 'Sources & data policy', summary: 'ChatGPT enabled for donation (conversation dates and message counts only).', material: true },
+        { section: 'Sources & data policy', summary: "ChatGPT enabled for donation: conversation dates, message counts, the messages you wrote and ChatGPT's replies (titles stay out).", material: true },
         { section: 'Sources & data policy', summary: 'YouTube channel name became an optional field, off by default.', material: true },
         { section: 'Consent', summary: 'Consent document 2.0 describes the added ChatGPT scope.', material: true },
         { section: 'Participant guides', summary: 'TikTok guide re-checked against current app menus.', material: false },
@@ -631,7 +632,7 @@ window.DEMO_DATA = (function () {
     { id: 'don_9c1e4b7a2d3f6081a5c7e9b2', participantId: 'P-0418', platform: 'tiktok', roundKey: 'wave-2', records: 2114, payloadBytes: 236804, createdAt: '2026-09-03T18:22:00Z', status: 'accepted', receiptCode: 'DD-K7M2-Q9RX' },
     { id: 'don_1f4a8c2e6b9d0357a2c4e6f8', participantId: 'P-0418', platform: 'youtube', roundKey: 'wave-2', records: 3402, payloadBytes: 401117, createdAt: '2026-09-03T18:41:00Z', status: 'accepted', receiptCode: 'DD-3HQV-8NTB' },
     { id: 'don_7b3d5f9a1c2e4680b1d3f5a7', participantId: 'P-0419', platform: 'tiktok', roundKey: 'wave-2', records: 987, payloadBytes: 110236, createdAt: '2026-09-04T02:15:00Z', status: 'accepted', receiptCode: 'DD-XW4P-2MJ7' },
-    { id: 'don_2e6c8a0f4b1d3579c2e4a6b8', participantId: 'P-0422', platform: 'chatgpt', roundKey: 'wave-2', records: 61, payloadBytes: 6210, createdAt: '2026-09-05T15:03:00Z', status: 'accepted', receiptCode: 'DD-9BRD-5KCN' },
+    { id: 'don_2e6c8a0f4b1d3579c2e4a6b8', participantId: 'P-0422', platform: 'chatgpt', roundKey: 'wave-2', records: 1204, payloadBytes: 121350, createdAt: '2026-09-05T15:03:00Z', status: 'accepted', receiptCode: 'DD-9BRD-5KCN' },
     { id: 'don_5a9e1c3b7d2f4680e1c3a5b7', participantId: 'P-0422', platform: 'tiktok', roundKey: 'wave-2', records: 1533, payloadBytes: 171894, createdAt: '2026-09-05T15:27:00Z', status: 'accepted', receiptCode: 'DD-M6TZ-7QGE' },
     { id: 'don_8d2f4a6c0e3b5791d2f4a6c8', participantId: 'P-0423', platform: 'youtube', roundKey: 'wave-2', records: 5218, payloadBytes: 614352, createdAt: '2026-09-06T21:48:00Z', status: 'accepted', receiptCode: 'DD-R2NF-4HWX' },
     { id: 'don_3c7a9e1b5d0f2468a3c5e7f9', participantId: 'P-0423', platform: 'tiktok', roundKey: 'wave-2', records: 402, payloadBytes: 45109, createdAt: '2026-09-06T22:03:00Z', status: 'accepted', receiptCode: 'DD-7VJK-3PMQ' },
@@ -709,9 +710,9 @@ window.DEMO_DATA = (function () {
       purpose:
         'Researchers at OASIS Lab are studying how the videos, posts and searches people encounter on everyday apps relate to wellbeing over time.',
       whatYouShare:
-        'Only the activity groups approved for this project: when you watched or liked videos, when you searched, public links to that content, and (only if you turn it on) the words you searched for. Titles, messages, profiles and account details are never collected.',
+        "Only the activity groups approved for this project: when you watched or liked videos, when you searched, public links to that content, and (only if you turn it on) the words you searched for. For ChatGPT: when conversations happened, the messages you wrote and ChatGPT's replies. Video titles, direct messages, profiles and account details are never collected.",
       risks:
-        'The main risk is that public links or optional search words could reveal interests. You review every outgoing record first, and data is stored pseudonymously under encryption.',
+        'The main risk is that public links, search words or ChatGPT messages could reveal interests or private matters. You review every outgoing record first, and data is stored pseudonymously under encryption.',
       voluntary:
         'Participation is voluntary. You may stop at any point without penalty. Compensation of USD 20.00 is offered after completing the required donations for a collection round.',
       withdrawal:
@@ -720,8 +721,8 @@ window.DEMO_DATA = (function () {
     paragraphs: [
       'You are being asked to take part in a research study conducted by OASIS Lab. Please read this document carefully. It explains what the study involves and what happens to the information you choose to donate.',
       'The study asks you to request a copy of your own activity from one or more apps or online services, open that file in the DataDonate application on your own device, and donate only the activity groups you choose. Your original file never leaves your device.',
-      'This project may collect: the dates and times of videos you watched or liked, the dates of searches you made, canonical public links to that content, and, only when you switch it on, the words you searched for. The application removes every other part of your export before you can even see it.',
-      'The study never collects profile or account details, contact information, direct messages, comments, followers, login or device history, purchases, advertising records, or the titles of videos you watched.',
+      "This project may collect: the dates and times of videos you watched or liked, the dates of searches you made, canonical public links to that content, and, only when you switch it on, the words you searched for. For ChatGPT it may collect when each conversation happened, how many messages it has, the messages you wrote and ChatGPT's replies; you can leave out any conversation or message. The application removes every other part of your export before you can even see it.",
+      'The study never collects profile or account details, contact information, direct messages, comments, followers, login or device history, purchases, advertising records, conversation titles, or the titles of videos you watched.',
       'Donated records are stored under a pseudonymous participant identifier in encrypted research storage. The research team can decrypt research payloads; this is not end-to-end encryption. Your optional contact email is encrypted separately and is never part of research data.',
       'You may withdraw at any time during the identifiable data-collection period. Withdrawal immediately ends your access and starts a deletion request that is completed within 30 business days. Compensation already earned is not affected.',
       'De-identified research data are retained for 365 days after the collection round closes and are then deleted according to the approved data-management plan.',
