@@ -39,3 +39,10 @@ top bar returns everything to the starting state.
 
 Add `?nosubtle` to the URL to force the pure-JS SHA-256 fallback (same
 results as WebCrypto).
+
+## Licence
+
+Copyright (c) 2026 Pooriya Jamie, OASIS Lab. All rights reserved. The demo
+may be viewed but not copied, modified, hosted or reused without written
+permission; see LICENSE. Interested in using the platform? Contact OASIS Lab
+at https://oasislab.science/.
