@@ -69,7 +69,7 @@ window.DemoEngine = (function () {
         const field = fields.get(fieldPolicy.id);
         if (!field) {
           issues.push({ path: fieldPath, message: 'Field is not supported by the adapter.' });
-        } else if (field.required && fieldPolicy.mode !== 'mandatory') {
+        } else if (categoryPolicy.enabled && field.required && fieldPolicy.mode !== 'mandatory') {
           issues.push({
             path: fieldPath,
             message: 'Adapter-required fields must remain mandatory in a donation policy.',
@@ -77,7 +77,7 @@ window.DemoEngine = (function () {
         }
       }
       for (const field of descriptor.fields) {
-        if (field.required && !seenFields.has(field.id)) {
+        if (categoryPolicy.enabled && field.required && !seenFields.has(field.id)) {
           issues.push({
             path: path + '.fields.' + field.id,
             message: 'Adapter-required field is missing from the project policy.',
@@ -207,6 +207,50 @@ window.DemoEngine = (function () {
       recordOverrides: { included: [], excluded: [] },
       conversationOverrides: { included: [], excluded: [] },
     };
+  }
+
+  /** All approved available fields and all dates; only individual records may leave. */
+  function recordExclusionsOnlyPolicy(sourceId, categories, excludedRecordIds) {
+    const policy = defaultPolicy(sourceId, categories);
+    for (const selection of Object.values(policy.categories)) {
+      for (const fieldId of Object.keys(selection.fields)) selection.fields[fieldId] = true;
+    }
+    policy.recordOverrides.excluded = Array.from(new Set(excludedRecordIds || []));
+    return policy;
+  }
+
+  /** Fail closed; never silently restore fields or records somebody removed. */
+  function assertRecordExclusionsOnlyPolicy(sourceId, categories, policy, knownRecordIds) {
+    const invalid = () => { throw new Error('This study allows only individual record removals.'); };
+    const object = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+    const exactKeys = (value, allowed) => object(value) &&
+      Object.keys(value).length === allowed.length && allowed.every((key) => Object.prototype.hasOwnProperty.call(value, key));
+    if (!exactKeys(policy, ['version', 'sourceId', 'categories', 'bulkExclusions', 'recordOverrides', 'conversationOverrides']) ||
+      policy.version !== 2 || policy.sourceId !== sourceId || !object(policy.categories) ||
+      Object.keys(policy.categories).length !== categories.length ||
+      !Array.isArray(policy.bulkExclusions) || policy.bulkExclusions.length !== 0 ||
+      !exactKeys(policy.recordOverrides, ['included', 'excluded']) ||
+      !Array.isArray(policy.recordOverrides.included) || policy.recordOverrides.included.length !== 0 ||
+      !Array.isArray(policy.recordOverrides.excluded) ||
+      !exactKeys(policy.conversationOverrides, ['included', 'excluded']) ||
+      !Array.isArray(policy.conversationOverrides.included) || policy.conversationOverrides.included.length !== 0 ||
+      !Array.isArray(policy.conversationOverrides.excluded) || policy.conversationOverrides.excluded.length !== 0) invalid();
+    for (const category of categories) {
+      const selection = policy.categories[category.id];
+      if (!exactKeys(selection, ['included', 'fields']) || selection.included !== true ||
+        !object(selection.fields) || Object.keys(selection.fields).length !== category.fields.length ||
+        category.fields.some((field) => selection.fields[field.id] !== true)) invalid();
+    }
+    const excluded = policy.recordOverrides.excluded;
+    if (new Set(excluded).size !== excluded.length || excluded.some((id) =>
+      typeof id !== 'string' || !id || (knownRecordIds && !knownRecordIds.has(id)))) invalid();
+  }
+
+  function isRecordExclusionsOnlyPolicy(sourceId, categories, policy, knownRecordIds) {
+    try {
+      assertRecordExclusionsOnlyPolicy(sourceId, categories, policy, knownRecordIds);
+      return true;
+    } catch (error) { return false; }
   }
 
   const MAX_RULE_QUERY_LENGTH = 200;
@@ -629,6 +673,11 @@ window.DemoEngine = (function () {
 
   async function finalize(extraction, policy, opts) {
     opts = opts || {};
+    if (opts.participantReviewMode !== undefined) {
+      if (opts.participantReviewMode !== 'record_exclusions_only') throw new Error('Unknown participant review mode.');
+      assertRecordExclusionsOnlyPolicy(extraction.inventory.source, extraction.categories, policy,
+        new Set(extraction.records.map((record) => record.localId)));
+    }
     const applied = applySelection(extraction.records, extraction.categories, policy);
     const payload = {
       schema: 'datadonate.donation.v2',
@@ -717,6 +766,9 @@ window.DemoEngine = (function () {
     projectCategoryDescriptors,
     applyProjectSourcePolicy,
     defaultPolicy,
+    recordExclusionsOnlyPolicy,
+    assertRecordExclusionsOnlyPolicy,
+    isRecordExclusionsOnlyPolicy,
     createBulkExclusionRule,
     createSelectionMatcher,
     applySelection,

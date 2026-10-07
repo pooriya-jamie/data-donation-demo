@@ -13,7 +13,7 @@ window.App = (function () {
   /* State                                                               */
   /* ------------------------------------------------------------------ */
 
-  const TODAY = '2026-09-19';
+  const TODAY = '2026-10-07';
 
   function initialState() {
     const project = D.PROJECTS[0];
@@ -23,7 +23,8 @@ window.App = (function () {
       motion: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
       catalog: { suspended: {} },
       project,
-      releases: D.RELEASES.map((r) => Object.assign({}, r)),
+      // Publishing in the tour must never mutate the seed for an earlier release.
+      releases: JSON.parse(JSON.stringify(D.RELEASES)),
       activeReleaseId: project.activeReleaseId,
       round: D.ROUNDS.find((r) => r.status === 'active'),
       hashes: { ready: false, releases: {} },
@@ -38,7 +39,7 @@ window.App = (function () {
         guideOnly: false,
         work: null,
         processing: null,
-        donations: [],
+        donations: D.DONATIONS.filter((d) => d.participantId === 'P-0417').map((d) => Object.assign({}, d)),
         ui: { browse: {}, previewPage: 0, previewQuery: '', previewCategory: '', confirmed: false, donating: null, donateError: null },
         withdrawal: null,
       },
@@ -212,6 +213,8 @@ window.App = (function () {
   function syncHash(view, sub) {
     const target = '#' + view + (sub ? '/' + sub : '');
     if (location.hash !== target) history.replaceState(null, '', target);
+    // replaceState does not emit hashchange. Keep rerenders on the visible screen.
+    S.route = { view, sub: sub || null };
   }
 
   let firstRoute = true;

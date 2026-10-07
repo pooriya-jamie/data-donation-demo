@@ -1094,6 +1094,10 @@ dialog.dialog::backdrop {
   max-width: 18ch;
 }
 
+.hero > * {
+  min-width: 0;
+}
+
 .hero .lede {
   margin-bottom: 1.25rem;
 }
@@ -1103,6 +1107,13 @@ dialog.dialog::backdrop {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin: 0 0 1.5rem;
+}
+
+.hero-facts > * {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .hero-facts li {
@@ -1255,6 +1266,8 @@ dialog.dialog::backdrop {
 
 .seg {
   display: inline-flex;
+  flex-wrap: wrap;
+  max-width: 100%;
   gap: 4px;
   padding: 4px;
   background: var(--color-slate-100);
@@ -1555,6 +1568,139 @@ dialog.dialog::backdrop {
 .device-screen h1 {
   font-size: clamp(1.45rem, 3vw, 1.85rem);
   max-width: 24ch;
+}
+
+/* Current participant flow: record exclusions only, entirely synthetic. */
+.simple-source {
+  cursor: default;
+  align-items: flex-start;
+}
+.simple-source .tile-body {
+  min-width: 0;
+}
+.simple-source .tile-badge {
+  align-self: flex-start;
+}
+.simple-source > .btn {
+  flex-shrink: 0;
+}
+.simple-shortcut {
+  margin-block: 1rem;
+}
+.simple-current-file,
+.simple-example-link {
+  overflow-wrap: anywhere;
+}
+.simple-summary {
+  margin-block: 1.25rem;
+}
+.simple-count {
+  font-size: 1.1rem;
+  min-height: 5em;
+}
+.simple-count > strong {
+  font-size: 1.65rem;
+}
+.simple-count > span {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  min-height: 3em;
+}
+.simple-update {
+  min-height: 3em;
+}
+.simple-fields > div {
+  margin-block: 0.85rem;
+}
+.simple-fields dt {
+  font-weight: 700;
+}
+.simple-fields dd {
+  margin: 0.2rem 0 0;
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+.simple-review-disclosure {
+  margin-block: 0.85rem;
+}
+.simple-review-disclosure > div {
+  padding: 0 1rem 1rem;
+  min-width: 0;
+}
+.simple-review-disclosure .field-label {
+  margin-top: 0.9rem;
+}
+.simple-record-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0;
+}
+.simple-record-list > li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.7rem;
+  padding: 0.8rem 0.35rem;
+  border-bottom: 1px solid var(--color-slate-200);
+}
+.simple-record-list > li.is-excluded {
+  background: var(--color-slate-100);
+}
+.simple-record-list input {
+  margin-top: 0.2rem;
+}
+.simple-record-list time,
+.simple-record-value,
+.simple-record-list a,
+.simple-item-link,
+.record-inclusion {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.simple-record-list time,
+.record-inclusion {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+.record-inclusion {
+  min-height: 3em;
+  cursor: pointer;
+}
+.simple-record-list a,
+.simple-item-link,
+.simple-record-value {
+  margin-block: 0.25rem;
+}
+.simple-review-disclosure .preview-record {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: var(--font-size-xs);
+}
+#review-feedback {
+  min-height: 3em;
+}
+.final-confirmation small {
+  display: block;
+  margin-top: 0.35rem;
+}
+@media (max-width: 620px) {
+  .simple-source {
+    flex-wrap: wrap;
+  }
+  .simple-source .tile-body {
+    flex-basis: calc(100% - 4rem);
+  }
+  .simple-source > .btn {
+    width: 100%;
+  }
+  .simple-review-disclosure .pager {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }
 
 .app-header-mini {
@@ -4058,7 +4204,7 @@ fieldset.question.is-wrong {
 @media (min-width: 768px) {
   .stepper {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .flow-progress-summary strong::before {
@@ -4072,7 +4218,7 @@ fieldset.question.is-wrong {
   }
 
   .hero {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .lifecycle {

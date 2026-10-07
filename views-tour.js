@@ -10,7 +10,7 @@
   /* Overview                                                            */
   /* ================================================================== */
 
-  const CEILING_SOURCES = ['tiktok', 'youtube', 'chatgpt'];
+  const CEILING_SOURCES = ['tiktok', 'youtube', 'instagram', 'facebook'];
 
   function chip(key, label, state, title) {
     return (
@@ -27,9 +27,7 @@
     const source = D.sourceById(sourceId);
     const capability = D.CAPABILITIES[sourceId];
     const policy = App.releasePolicyFor(sourceId);
-    const release = App.activeRelease();
     const projectDescriptors = E.projectCategoryDescriptors(capability.categories, policy);
-    const participantPolicy = E.defaultPolicy(sourceId, projectDescriptors);
 
     const seg =
       '<div class="seg" role="group" aria-label="Source">' +
@@ -47,7 +45,7 @@
         const chips = category.fields
           .map((f) => {
             const state = f.required ? 'is-mandatory' : f.defaultIncluded ? 'is-on' : 'is-off';
-            const title = f.required ? 'Always part of a record' : f.sensitivity === 'high' ? 'Words you typed: off unless you turn it on' : 'Starts ' + (f.defaultIncluded ? 'on' : 'off');
+            const title = f.required ? 'Required by the base record format when present' : 'Supported by the software; this study decides whether it is approved';
             return chip(category.id + '.' + f.id, f.label, state, title);
           })
           .join('');
@@ -68,8 +66,8 @@
         const chips = category.fields
           .map((f) => {
             const fp = categoryPolicy.fields.find((x) => x.id === f.id);
-            if (!fp || fp.mode === 'prohibited') return chip(category.id + '.' + f.id, f.label, 'is-prohibited', 'This study never collects it. Deleted on your device before you see anything.');
-            if (fp.mode === 'mandatory') return chip(category.id + '.' + f.id, f.label, 'is-mandatory', 'Always part of a record in this study');
+            if (!fp || fp.mode === 'prohibited') return chip(category.id + '.' + f.id, f.label, 'is-prohibited', 'Not included in this study donation; the original export is unchanged.');
+            if (fp.mode === 'mandatory') return chip(category.id + '.' + f.id, f.label, 'is-mandatory', 'Included when present in each retained record');
             const on = fp.defaultIncluded === undefined ? f.defaultIncluded : fp.defaultIncluded;
             return chip(category.id + '.' + f.id, f.label, on ? 'is-on' : 'is-off', 'Optional · starts ' + (on ? 'on' : 'off'));
           })
@@ -78,17 +76,11 @@
       })
       .join('');
 
-    // Layer 3: what you choose (starting point)
+    // Layer 3: all approved fields remain; participants exclude whole records.
     const participantGroups = projectDescriptors
       .map((category) => {
-        const selection = participantPolicy.categories[category.id];
         const chips = category.fields
-          .map((f) => {
-            const on = f.required ? true : selection.fields[f.id];
-            const state = f.required ? 'is-mandatory' : on ? 'is-on' : 'is-off';
-            const title = f.required ? 'Always included' : on ? 'Shared unless you turn it off' : 'Off unless you turn it on';
-            return chip(category.id + '.' + f.id, f.label, state, title);
-          })
+          .map((f) => chip(category.id + '.' + f.id, f.label, 'is-mandatory', 'Included when present. Remove the whole record if you do not want to share it.'))
           .join('');
         return '<div class="ring-group"><span class="ring-group-label">' + esc(category.label) + '</span>' + chips + '</div>';
       })
@@ -110,17 +102,17 @@
       '<div class="ring ring-release"><div class="ring-head"><strong>2 · What this study allows</strong><span>' +
       (narrowing.length ? esc(narrowing.join(' · ')) : 'everything from layer 1') +
       '</span></div><div class="ring-groups">' + releaseGroups + '</div>' +
-      '<div class="ring ring-participant"><div class="ring-head"><strong>3 · What you choose to share</strong><span>your starting point</span></div>' +
+      '<div class="ring ring-participant"><div class="ring-head"><strong>3 · What you review and donate</strong><span>all available approved records, minus individual exclusions</span></div>' +
       '<div class="ring-groups">' + participantGroups + '</div>' +
-      '<p class="xs muted" style="margin:0.6rem 0 0">You can also switch whole groups off, limit the dates, or remove single items. You can never add something that is not here.</p>' +
+      '<p class="xs muted" style="margin:0.6rem 0 0">All dates and approved fields are included when present. You may remove individual records; there are no category, field or date switches. Missing values are not invented.</p>' +
       '</div></div></div>' +
       '</div>' +
       '<div class="card ceilings-legend"><h3>How to read it</h3><ul>' +
-      '<li><span class="chip is-mandatory">detail</span> always part of a record, like the date.</li>' +
-      '<li><span class="chip is-on">detail</span> shared unless you turn it off.</li>' +
-      '<li><span class="chip is-off">detail</span> off unless you turn it on. Words you typed start here.</li>' +
-      '<li><span class="chip is-prohibited">detail</span> this study never collects it. It is deleted on your device before you see anything.</li>' +
-      '</ul><p class="xs muted">Hover a detail to follow it through the layers.</p></div>' +
+      '<li><span class="chip is-mandatory">detail</span> included when present in each retained record.</li>' +
+      '<li><span class="chip is-on">detail</span> a software default, before study rules apply.</li>' +
+      '<li><span class="chip is-off">detail</span> off by default in the software; a study may explicitly approve it.</li>' +
+      '<li><span class="chip is-prohibited">detail</span> not included in this study donation. Your original export is unchanged.</li>' +
+      '</ul><p class="xs muted">Facebook search words are explicitly included here and can be sensitive. Feed items shown are not proof of watching. Hover a detail to follow it through the layers.</p></div>' +
       '</div>';
   }
 
@@ -132,14 +124,15 @@
   function renderSourcesStrip() {
     const mount = document.getElementById('sources-strip');
     if (!mount) return;
-    mount.innerHTML = D.SOURCES.map((source) => {
+    const required = App.requiredSourceIds();
+    mount.innerHTML = CEILING_SOURCES.map((id) => D.sourceById(id)).map((source) => {
       const policy = App.releasePolicyFor(source.id);
       const suspended = App.sourceSuspended(source.id);
       const status = suspended ? 'paused' : source.capabilityStatus === 'donation_ready' ? 'ready' : source.capabilityStatus === 'instructions_only' ? 'guide only' : 'not yet';
       const toneClass = suspended ? 'admin-status-danger' : source.capabilityStatus === 'donation_ready' ? 'admin-status-positive' : source.capabilityStatus === 'instructions_only' ? 'admin-status-warning' : '';
       const projectLine =
         policy && policy.mode === 'donation'
-          ? (policy.required ? 'Required' : 'Optional') + ' in this study'
+          ? (required.includes(source.id) ? 'Required' : 'Optional') + ' in ' + S.round.name
           : policy && policy.mode === 'guide_only'
             ? 'Instructions only in this study'
             : 'Not used in this study';
@@ -191,7 +184,7 @@
     { id: 'once2', label: 'No duplicate slipped in meanwhile' },
     { phase: 'Keeping it' },
     { id: 'promote', label: 'File moved to a permanent, locked place; the temporary slot is deleted' },
-    { id: 'receipt', label: 'Receipt, payment note and audit entry written together' },
+    { id: 'receipt', label: 'Receipt, round progress and audit entry written together (unpaid)' },
   ];
 
   function buildSteps(d) {
@@ -208,7 +201,7 @@
       { from: 'api', to: 'storage', label: 'Check fingerprint and format', sub: 'must match what you reviewed · only allowed details inside', checks: ['len', 'sha', 'schema', 'policy2'], failAt: 'tampered', log: ['→ GET bytes', '   sha256(bytes)=' + E.shortHash(d.sha256) + '  manifest=' + E.shortHash(d.sha256), '   schema datadonate.donation.v2 ✓  categories/fields ⊆ policy ✓'] },
       { from: 'api', to: 'db', label: 'Re-check the rules', sub: 'study unchanged? service still allowed? still not a repeat?', checks: ['release', 'switch2', 'once2'], failAt: 'suspended', log: ['   FOR UPDATE participants, studies (active_release_id=' + d.releaseId + ' ✓)', '   source_capability_controls[' + d.platform + '] enabled ✓'] },
       { from: 'api', to: 'storage', label: 'Lock the file away', sub: 'permanent encrypted copy · temporary slot deleted', checks: ['promote'], log: ['→ PUT projects/' + p + '/rounds/' + r + '/donations/' + short(d.id) + '.json  (If-None-Match: *)', '→ DELETE staging object'] },
-      { from: 'api', to: 'db', label: 'Write the receipt', sub: 'receipt · payment note · audit entry, all at once', checks: ['receipt'], status: 'accepted', log: ['   INSERT stored_payloads (sha256, bytes, encryption=SSE-KMS)', '   UPDATE donation_attempts SET status=accepted', '   INSERT donation_receipts (' + d.receiptCode + ')', '   UPDATE participant_round_eligibility → ' + (d.roundComplete ? 'completed · compensation eligibility recorded' : 'in_progress'), '   INSERT audit_events (donation.accepted)'] },
+      { from: 'api', to: 'db', label: 'Write the receipt', sub: 'receipt · round progress · audit entry, all at once', checks: ['receipt'], status: 'accepted', log: ['   INSERT stored_payloads (sha256, bytes, encryption=SSE-KMS)', '   UPDATE donation_attempts SET status=accepted', '   INSERT donation_receipts (' + d.receiptCode + ')', '   UPDATE participant_round_eligibility → ' + (d.roundComplete ? 'completed · unpaid' : 'in_progress'), '   INSERT audit_events (donation.accepted)'] },
       { from: 'api', to: 'worker', label: 'Receipt sent back', sub: d.receiptCode, checks: [], log: ['← 200 { status: "accepted", receipt: "' + d.receiptCode + '" }'] },
     ];
   }
@@ -221,10 +214,11 @@
     const extraction = D.generateCandidates('tiktok');
     const policy = App.releasePolicyFor('tiktok');
     const narrowed = E.applyProjectSourcePolicy(extraction, policy);
-    const selection = E.defaultPolicy('tiktok', narrowed.categories);
+    const selection = E.recordExclusionsOnlyPolicy('tiktok', narrowed.categories);
     const hashes = App.hashesFor(S.activeReleaseId);
     const finalized = await E.finalize(narrowed, selection, {
       adapterVersion: D.CAPABILITIES.tiktok.adapterVersion,
+      participantReviewMode: App.activeRelease().participantReviewMode,
       projectReleaseId: S.activeReleaseId,
       sourcePolicySha256: hashes.sourcePolicy.tiktok,
       collectionRoundId: S.round.id,
@@ -311,7 +305,7 @@
     const r = S.round.id;
     const final = S.server.status === 'accepted';
     mount.innerHTML =
-      '<span class="eyebrow">' + (d.seeded ? 'A sample donation' : 'Your donation from step 2') + '</span>' +
+      '<span class="eyebrow">' + (d.seeded ? 'A synthetic sample donation' : 'Your simulated participant donation') + '</span>' +
       '<h2 style="font-size:1.05rem">' + esc(App.sourceName(d.platform)) + ' · ' + E.formatNumber(d.records) + ' records · ' + E.formatBytes(d.payloadBytes) + '</h2>' +
       '<dl class="kv">' +
       '<dt>Fingerprint</dt><dd class="mono">' + esc(E.shortHash(d.sha256, 16, 8)) + '</dd>' +
@@ -323,7 +317,7 @@
       '<span>Temporary slot <span class="muted">· deleted after 15 minutes or once accepted</span></span>' +
       '<span class="' + (final ? 'is-final' : '') + '">Permanent locked copy <span class="muted">· filed under study ' + p.slice(0, 10) + '…, round ' + esc(r) + '</span></span>' +
       '</div>' +
-      (d.seeded ? '<p class="xs muted" style="margin:0.75rem 0 0">Make a donation in step 2 and this view will replay it with your own choices and fingerprint.</p>' : '');
+      '<p class="xs muted" style="margin:0.75rem 0 0">Offline simulation only: no upload, encrypted storage or real receipt is created.' + (d.seeded ? ' Try the participant section to replay your synthetic selection here.' : '') + '</p>';
   }
 
   function renderControls() {
@@ -347,7 +341,7 @@
     const mount = document.getElementById('seq-log');
     if (!mount) return;
     if (S.server.log.length === 0) {
-      mount.innerHTML = '<div class="t">Press Play above. These lines mirror what the real server writes (server/src/routes/donations.ts).</div>';
+      mount.innerHTML = '<div class="t">Press Play above. These illustrative log lines are generated locally, not read from a real server.</div>';
       return;
     }
     mount.innerHTML = S.server.log.map((line) => '<div class="' + line.cls + '"><span class="t">' + line.t + '</span> ' + esc(line.text) + '</div>').join('');

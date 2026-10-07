@@ -32,7 +32,7 @@
 
   const STUBS = {
     setup: ['Project setup', 'Identity, governance reference and dates, contacts, timezone, visibility and lifecycle. Slug and timezone freeze at first activation.'],
-    consent: ['Consent', 'Immutable consent documents, comprehension questions with server-side answers, scroll and signature rules, receipt and email-copy behavior.'],
+    consent: ['Consent', 'Immutable consent documents and a release-specific data-scope notice. Participants read and agree again when collection terms change; the original document and prior evidence remain unchanged.'],
     communications: ['Communications', 'Versioned invitation and reminder templates. A project in external mode cannot queue application email at all.'],
     guides: ['Participant guides', 'Verified base guide versions with project notes. Images must be synthetic or redacted and contain no identifiers.'],
     downloads: ['Downloads', 'Individual and batch research downloads scoped to one project, release and round. Each requires a reason, step-up verification and an audit event, and produces a one-use authorization.'],
@@ -63,8 +63,8 @@
     if (stepUpFresh()) return true;
     const result = await App.dialog({
       title: 'Confirm it is you',
-      body: '<p>Sensitive administrator actions require recent step-up authentication (within the last 5 minutes). Re-enter your password to continue.</p>',
-      fields: [{ name: 'password', label: 'Password for ' + A.user.username, type: 'password', required: true, hint: 'Demo: any value is accepted.' }],
+      body: '<p>This offline demo simulates recent step-up authentication. Enter any fictional value; do not enter a real password. Nothing is authenticated against a server.</p>',
+      fields: [{ name: 'password', label: 'Demo password for ' + A.user.username, type: 'password', required: true, hint: 'Any fictional value is accepted.' }],
       confirmLabel: 'Verify',
     });
     if (!result.ok) return false;
@@ -77,13 +77,58 @@
     return App.activeRelease();
   }
 
-  function acceptedDonations() {
-    return A.donations.filter((d) => d.status === 'accepted');
+  function acceptedDonations(roundKey) {
+    return A.donations.filter((d) => d.status === 'accepted' && (!roundKey || d.roundKey === roundKey));
+  }
+
+  function roundName(roundKey) {
+    const round = D.ROUNDS.find((r) => r.roundKey === roundKey);
+    return round ? round.name : roundKey || 'Unknown round';
+  }
+
+  function requiredForRound(round) {
+    if (round.roundKey === S.round.roundKey) return App.requiredSourceIds();
+    const rel = S.releases.find((r) => r.id === round.projectReleaseId);
+    const policies = rel ? rel.sourcePolicies : [];
+    return Array.from(new Set(policies.filter((p) => p.mode === 'donation' && p.required).map((p) => p.sourceId).concat(round.requiredSourceIds)));
+  }
+
+  function participantRoundStatus(participant, round) {
+    const accepted = acceptedDonations(round.roundKey).filter((d) => d.participantId === participant.id);
+    if (accepted.length) {
+      return requiredForRound(round).every((id) => accepted.some((d) => d.platform === id)) ? 'complete' : 'partial';
+    }
+    // Historical summary rows can outlive their payloads. The live participant's
+    // current round is computed only from accepted donations, never skipped items.
+    if (participant.id === S.participant.id && round.roundKey === S.round.roundKey) return 'none';
+    return (participant.rounds || {})[round.roundKey] || 'none';
+  }
+
+  function participantConsent(p) {
+    const recorded = p.id === S.participant.id && S.participant.consent.agreed;
+    return recorded
+      ? { version: S.participant.consent.version, releaseId: S.participant.consent.releaseId }
+      : { version: p.consentVersion, releaseId: p.consentReleaseId };
+  }
+
+  function participantNeedsReconsent(p) {
+    const status = p.id === S.participant.id ? S.participant.status : p.status;
+    const consent = participantConsent(p);
+    if (status !== 'active' || !consent.version) return false;
+    if (consent.version !== activeRelease().consentVersion) return true;
+    let current = activeRelease();
+    const visited = new Set();
+    while (current && !visited.has(current.id)) {
+      if (current.id === consent.releaseId) return false;
+      if (current.requiresReconsent) return true;
+      visited.add(current.id);
+      current = S.releases.find((r) => r.id === current.supersedesReleaseId);
+    }
+    return true;
   }
 
   function reconsentPending() {
-    const rel = activeRelease();
-    return A.participants.filter((p) => p.status === 'active' && p.consentVersion && p.consentVersion !== rel.consentVersion);
+    return A.participants.filter(participantNeedsReconsent);
   }
 
   /* ------------------------------------------------------------------ */
@@ -130,7 +175,8 @@
     const rel = activeRelease();
     const active = A.participants.filter((p) => p.status === 'active').length;
     const invited = A.participants.filter((p) => p.status === 'invited').length;
-    const accepted = acceptedDonations().length;
+    const accepted = acceptedDonations(S.round.roundKey).length;
+    const attempts = A.donations.filter((d) => d.roundKey === S.round.roundKey).length;
     const pendingWithdrawals = A.withdrawals.filter((w) => w.status === 'received').length;
     const jobsAwaiting = A.withdrawals.filter((w) => w.deletionJob && w.deletionJob.status === 'pending_approval').length;
     const suspended = Object.keys(S.catalog.suspended);
@@ -138,7 +184,7 @@
     const metrics =
       '<div class="admin-metric-grid">' +
       '<div class="admin-metric"><span>Participants</span><strong>' + active + '</strong><small>' + active + ' active · ' + invited + ' invited</small></div>' +
-      '<div class="admin-metric admin-metric-positive"><span>Accepted donations</span><strong>' + accepted + '</strong><small>' + A.donations.length + ' total attempts</small></div>' +
+      '<div class="admin-metric admin-metric-positive"><span>Accepted donations</span><strong>' + accepted + '</strong><small>' + esc(S.round.name) + ' · ' + attempts + ' attempts · ' + A.donations.length + ' across all rounds</small></div>' +
       '<div class="admin-metric"><span>Feedback</span><strong>' + D.FEEDBACK.averageRating.toFixed(1) + '</strong><small>average rating · ' + D.FEEDBACK.ratings + ' ratings</small></div>' +
       '<div class="admin-metric ' + (pendingWithdrawals ? 'admin-metric-warning' : '') + '"><span>Pending withdrawals</span><strong>' + pendingWithdrawals + '</strong><small>' + jobsAwaiting + ' job' + (jobsAwaiting === 1 ? '' : 's') + ' awaiting action</small></div>' +
       '</div>';
@@ -154,7 +200,7 @@
       '<dl class="admin-definition-list"><dt>Health</dt><dd>' + badge(D.SYSTEM.status) + '</dd><dt>Deployment</dt><dd>' + esc(D.SYSTEM.deploymentProfile) + ' profile · S3 SSE-KMS</dd><dt>Application version</dt><dd><code>' + esc(D.SYSTEM.appVersion.slice(0, 12)) + '</code></dd><dt>Active release</dt><dd>v' + rel.version + ' · published ' + esc(E.formatDate(rel.publishedAt)) + '</dd><dt>Policy hash</dt><dd><code>' + esc(E.shortHash(App.hashesFor(rel.id).materialHash, 10, 6)) + '</code></dd></dl>' +
       '<p style="margin:0.75rem 0 0"><button type="button" class="link-btn" data-action="a-nav" data-screen="system">Open system details</button></p>';
     const byPlatform = App.donationSources().map((s) => {
-      const n = acceptedDonations().filter((d) => d.platform === s.id).length;
+      const n = acceptedDonations(S.round.roundKey).filter((d) => d.platform === s.id).length;
       return { label: s.displayName, n };
     });
     const max = Math.max(1, ...byPlatform.map((b) => b.n));
@@ -171,22 +217,24 @@
   }
 
   function donationRow(d) {
-    return '<tr class="' + (d.isNew ? 'is-new' : '') + '"><td class="admin-mono">' + esc(d.id.slice(0, 16)) + '…</td><td class="admin-mono">' + esc(d.participantId) + '</td><td>' + esc(App.sourceName(d.platform)) + '</td><td>' + (d.records ? E.formatNumber(d.records) : '—') + '</td><td>' + (d.payloadBytes ? E.formatBytes(d.payloadBytes) : '—') + '</td><td>' + esc(E.formatDateTime(d.createdAt)) + '</td><td>' + badge(d.status) + (d.receiptCode && d.status === 'accepted' ? '<div class="xs admin-mono muted">' + esc(d.receiptCode) + '</div>' : '') + '</td></tr>';
+    return '<tr class="' + (d.isNew ? 'is-new' : '') + '"><td class="admin-mono">' + esc(d.id.slice(0, 16)) + '…</td><td class="admin-mono">' + esc(d.participantId) + '</td><td>' + esc(roundName(d.roundKey)) + '</td><td>' + esc(App.sourceName(d.platform)) + '</td><td>' + (d.records ? E.formatNumber(d.records) : '—') + '</td><td>' + (d.payloadBytes ? E.formatBytes(d.payloadBytes) : '—') + '</td><td>' + esc(E.formatDateTime(d.createdAt)) + '</td><td>' + badge(d.status) + (d.receiptCode && d.status === 'accepted' ? '<div class="xs admin-mono muted">' + esc(d.receiptCode) + '</div>' : '') + '</td></tr>';
   }
 
   function screenDonations() {
     const f = A.filters;
-    const rows = A.donations.filter((d) => (f.status === 'all' || d.status === f.status) && (f.platform === 'all' || d.platform === f.platform));
+    const roundFilter = f.round || 'all';
+    const rows = A.donations.filter((d) => (roundFilter === 'all' || d.roundKey === roundFilter) && (f.status === 'all' || d.status === f.status) && (f.platform === 'all' || d.platform === f.platform));
     const statuses = ['all', 'awaiting_upload', 'uploaded', 'accepted', 'failed', 'deleted'];
-    const filters = '<div class="admin-filters"><select class="select-input" data-change="a-filter-status" aria-label="Status">' + statuses.map((s) => '<option value="' + s + '" ' + (f.status === s ? 'selected' : '') + '>' + (s === 'all' ? 'All statuses' : esc(s.replace('_', ' ').replace(/^./, (c) => c.toUpperCase()))) + '</option>').join('') + '</select><select class="select-input" data-change="a-filter-platform" aria-label="Platform"><option value="all">All platforms</option>' + App.donationSources().map((s) => '<option value="' + s.id + '" ' + (f.platform === s.id ? 'selected' : '') + '>' + esc(s.displayName) + '</option>').join('') + '</select></div>';
+    const platforms = D.SOURCES.filter((s) => App.donationSources().some((active) => active.id === s.id) || A.donations.some((d) => d.platform === s.id));
+    const filters = '<div class="admin-filters"><select class="select-input" data-change="a-filter-round" aria-label="Collection round"><option value="all">All rounds</option>' + D.ROUNDS.map((r) => '<option value="' + esc(r.roundKey) + '" ' + (roundFilter === r.roundKey ? 'selected' : '') + '>' + esc(r.name) + '</option>').join('') + '</select><select class="select-input" data-change="a-filter-status" aria-label="Status">' + statuses.map((s) => '<option value="' + s + '" ' + (f.status === s ? 'selected' : '') + '>' + (s === 'all' ? 'All statuses' : esc(s.replace('_', ' ').replace(/^./, (c) => c.toUpperCase()))) + '</option>').join('') + '</select><select class="select-input" data-change="a-filter-platform" aria-label="Platform"><option value="all">All platforms</option>' + platforms.map((s) => '<option value="' + s.id + '" ' + (f.platform === s.id ? 'selected' : '') + '>' + esc(s.displayName) + '</option>').join('') + '</select></div>';
     const table = rows.length
-      ? '<div class="admin-table-wrap responsive"><table class="admin-table"><thead><tr><th>Donation</th><th>Participant</th><th>Platform</th><th>Records</th><th>Size</th><th>Created</th><th>Status</th></tr></thead><tbody>' + rows.map(donationRow).join('') + '</tbody></table></div>' +
-        '<div class="admin-mobile-list">' + rows.map((d) => '<div class="admin-mobile-card"><strong class="admin-mono">' + esc(d.id.slice(0, 16)) + '…</strong> ' + badge(d.status) + '<dl class="kv"><dt>Participant</dt><dd>' + esc(d.participantId) + '</dd><dt>Platform</dt><dd>' + esc(App.sourceName(d.platform)) + '</dd><dt>Records</dt><dd>' + (d.records ? E.formatNumber(d.records) : '—') + '</dd><dt>Created</dt><dd>' + esc(E.formatDate(d.createdAt)) + '</dd></dl></div>').join('') + '</div>'
+      ? '<div class="admin-table-wrap responsive"><table class="admin-table"><thead><tr><th>Donation</th><th>Participant</th><th>Round</th><th>Platform</th><th>Records</th><th>Size</th><th>Created</th><th>Status</th></tr></thead><tbody>' + rows.map(donationRow).join('') + '</tbody></table></div>' +
+        '<div class="admin-mobile-list">' + rows.map((d) => '<div class="admin-mobile-card"><strong class="admin-mono">' + esc(d.id.slice(0, 16)) + '…</strong> ' + badge(d.status) + '<dl class="kv"><dt>Participant</dt><dd>' + esc(d.participantId) + '</dd><dt>Round</dt><dd>' + esc(roundName(d.roundKey)) + '</dd><dt>Platform</dt><dd>' + esc(App.sourceName(d.platform)) + '</dd><dt>Records</dt><dd>' + (d.records ? E.formatNumber(d.records) : '—') + '</dd><dt>Created</dt><dd>' + esc(E.formatDate(d.createdAt)) + '</dd></dl></div>').join('') + '</div>'
       : '<div class="admin-empty"><span class="admin-empty-icon">' + icon('database') + '</span><br /><strong>No donation attempts found</strong><br />No donations match the selected filters.</div>';
     return (
       pageHeader(project().name, 'Donations', 'Review donation metadata and integrity status. Payload contents remain protected behind a separate audited download workflow.', '<button type="button" class="btn btn-secondary btn-sm" data-action="a-nav" data-screen="downloads">' + icon('download', 'ico-sm') + ' Secure downloads</button>') +
       '<div class="admin-privacy-callout">' + icon('shield-check') + '<div><strong>Metadata-only view</strong><p>This page never renders participant payload content. Downloads require a reason, step-up verification, and an audit event.</p></div></div>' +
-      panel('Donation attempts', 'Filter by processing status or source platform. Rows highlighted in green arrived from the participant journey in this session.', filters + table)
+      panel('Donation attempts', rows.length + ' fictional attempts shown · ' + (roundFilter === 'all' ? 'all rounds, including history' : roundName(roundFilter)) + '. Filter by round, status or source. Green rows were simulated in this session.', filters + table)
     );
   }
 
@@ -197,7 +245,7 @@
     const material = changes.some((c) => c.material);
     const warnings = [];
     const roundRequired = S.round.requiredSourceIds.filter((id) => !rel.sourcePolicies.find((p) => p.sourceId === id && p.required));
-    if (roundRequired.length) warnings.push({ title: 'Round ' + S.round.roundKey + ' adds a required source', detail: App.sourceName(roundRequired[0]) + ' is optional at project level but required by this round. Completion and flat compensation use the union: ' + App.requiredSourceIds().map(App.sourceName).join(' + ') + '.' });
+    if (roundRequired.length) warnings.push({ title: S.round.name + ' specifies required sources', detail: roundRequired.map(App.sourceName).join(' + ') + ' are required by this round. Effective completion requirement: ' + App.requiredSourceIds().map(App.sourceName).join(' + ') + '. Instagram and Facebook remain optional. Participation is unpaid.' });
     Object.keys(S.catalog.suspended).forEach((id) => warnings.push({ title: App.sourceName(id) + ' adapter is globally suspended', detail: 'Publishing does not change the global switch. Participants cannot upload for this source until an owner restores it.' }));
     if (material) warnings.push({ title: 'Material change: every active participant must re-consent', detail: reconsentPending().length + ' already need it from v' + rel.version + '; ' + A.participants.filter((p) => p.status === 'active' && p.consentVersion === rel.consentVersion).length + ' more will after v' + nextVersion + '.' });
     const ready = changes.length > 0;
@@ -227,17 +275,16 @@
     }).join('');
     const catalog = panel('Global source adapters', 'Pausing a service is an emergency switch for owners, with a reason on record. Participants lose the upload button for that service immediately; every donation is re-checked against this switch.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Source</th><th>Base capability</th><th>Operational state</th><th>Control</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'sliders');
     const releaseInfo = panel('Release information', null, '<dl class="admin-definition-list"><dt>Application version</dt><dd><code>' + esc(sys.appVersion) + '</code></dd><dt>Deployment profile</dt><dd>' + esc(sys.deploymentProfile) + '</dd><dt>Last backup</dt><dd>' + badge(sys.backup.status) + ' ' + esc(E.formatDateTime(sys.backup.completedAt)) + '</dd><dt>Umbrella projects</dt><dd>' + D.PROJECTS.length + ' (' + D.PROJECTS.filter((p) => p.lifecycle === 'active').length + ' active)</dd></dl>', 'info');
-    return pageHeader('Operations', 'System', 'Read-only service health and release information for this deployment.') + '<section class="admin-panel admin-health-hero"><div><span class="admin-eyebrow">Overall status</span><h2>' + badge(sys.status) + ' All services reporting</h2></div><span class="step-up-note ' + (stepUpFresh() ? 'is-fresh' : '') + '">' + icon('key', 'ico-sm') + (stepUpFresh() ? 'Step-up verified' : 'Step-up required for controls') + '</span></section>' + health + catalog + releaseInfo;
+    return pageHeader('Operations', 'System', 'Fictional health and deployment information. No live service, backup, storage or security checks run in this offline demo.') + '<section class="admin-panel admin-health-hero"><div><span class="admin-eyebrow">Simulated status</span><h2>' + badge(sys.status) + ' Example services</h2></div><span class="step-up-note ' + (stepUpFresh() ? 'is-fresh' : '') + '">' + icon('key', 'ico-sm') + (stepUpFresh() ? 'Demo step-up verified' : 'Demo step-up required for controls') + '</span></section>' + health + catalog + releaseInfo;
   }
 
   function screenRounds() {
-    const rel = activeRelease();
-    const projectRequired = rel.sourcePolicies.filter((p) => p.mode === 'donation' && p.required).map((p) => p.sourceId);
     const list = '<ul class="admin-round-list">' + D.ROUNDS.map((r) => {
-      const union = Array.from(new Set(projectRequired.concat(r.requiredSourceIds)));
-      return '<li><span><strong>' + esc(r.name) + ' <span class="admin-mono xs muted">' + esc(r.roundKey) + '</span></strong><span>Opens ' + esc(E.formatDate(r.startsAt)) + ' · donations close ' + esc(E.formatDate(r.donationsCloseAt)) + ' · access ends ' + esc(E.formatDate(r.participantAccessEndsAt)) + '</span><span>Required: ' + esc(union.map(App.sourceName).join(' + ') || 'none') + ' (project ' + esc(projectRequired.map(App.sourceName).join(', ') || '—') + ' ∪ round ' + esc(r.requiredSourceIds.map(App.sourceName).join(', ') || '—') + ') · eligibility: ' + esc(r.eligibilityMode.replace(/_/g, ' ')) + '</span><span>' + r.completed + ' completed · ' + r.partial + ' partial · ' + r.accepted + ' accepted donations</span></span>' + badge(r.status) + '</li>';
+      const required = requiredForRound(r);
+      const states = A.participants.map((p) => participantRoundStatus(p, r));
+      return '<li><span><strong>' + esc(r.name) + ' <span class="admin-mono xs muted">' + esc(r.roundKey) + '</span></strong><span>Opens ' + esc(E.formatDate(r.startsAt)) + ' · donations close ' + esc(E.formatDate(r.donationsCloseAt)) + ' · access ends ' + esc(E.formatDate(r.participantAccessEndsAt)) + '</span><span>Required: ' + esc(required.map(App.sourceName).join(' + ') || 'none') + ' · eligibility: ' + esc(r.eligibilityMode.replace(/_/g, ' ')) + ' · unpaid</span><span>' + states.filter((state) => state === 'complete').length + ' completed · ' + states.filter((state) => state === 'partial').length + ' partial · ' + acceptedDonations(r.roundKey).length + ' accepted donations</span></span>' + badge(r.status) + '</li>';
     }).join('') + '</ul>';
-    return pageHeader(project().name, 'Collection rounds', 'A round is a collection wave. A participant can donate each service once per round and come back for the next wave.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-not-in-tour">New round</button>') + panel('Rounds', null, list, 'flag') + '<div class="notice notice-info">' + icon('info') + '<p>A service the study marks as required is required in every round; a round can add more. Payment eligibility is recorded only when every required service has an accepted donation.</p></div>';
+    return pageHeader(project().name, 'Collection rounds', 'Each round is a separate collection pass. An accepted donation in an earlier round does not block a new donation in the current open round.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-not-in-tour">New round</button>') + panel('Rounds', 'Fictional progress shown separately for each round.', list, 'flag') + '<div class="notice notice-info">' + icon('info') + '<p>Round 2 requires TikTok and YouTube. Instagram and Facebook remain optional, even after those required donations are complete. All participation is unpaid; skips do not count as accepted donations.</p></div>';
   }
 
   function screenWithdrawals() {
@@ -259,18 +306,19 @@
   }
 
   function screenParticipants() {
-    const rel = activeRelease();
     const P = S.participant;
     const rows = A.participants.map((p) => {
       const live = p.id === P.id;
-      const consent = live ? (P.consent.agreed ? P.consent.version : null) : p.consentVersion;
+      const evidence = participantConsent(p);
+      const consent = evidence.version;
       const status = live ? P.status : p.status;
-      const w2 = live ? (P.donations.length ? (App.requiredSourceIds().every((id) => P.donations.some((d) => d.platform === id)) ? 'complete' : 'partial') : 'none') : p.rounds['wave-2'];
-      const note = live ? 'Live tour participant' : p.note || '';
-      const reconsent = status === 'active' && consent && consent !== rel.consentVersion;
-      return '<tr class="' + (p.isNew ? 'is-new' : '') + '"><td class="admin-mono">' + esc(p.id) + '</td><td>' + badge(status) + '</td><td>' + esc(E.formatDate(p.invitedAt)) + '</td><td>' + (consent ? esc(consent) + (reconsent ? ' ' + badge('re-consent required') : '') : '<span class="muted">—</span>') + '</td><td>' + badge(p.rounds['wave-1']) + '</td><td>' + badge(w2) + '</td><td class="xs muted">' + esc(note) + '</td></tr>';
+      const roundCells = D.ROUNDS.map((round) => '<td>' + badge(participantRoundStatus(p, round)) + '</td>').join('');
+      const note = live ? 'Interactive demo participant' : p.note || '';
+      const consentReleaseId = evidence.releaseId;
+      const reconsent = participantNeedsReconsent(p);
+      return '<tr class="' + (p.isNew ? 'is-new' : '') + '"><td class="admin-mono">' + esc(p.id) + '</td><td>' + badge(status) + '</td><td>' + esc(E.formatDate(p.invitedAt)) + '</td><td>' + (consent ? esc(consent) + (consentReleaseId ? '<div class="xs muted">' + esc(consentReleaseId) + '</div>' : '') + (reconsent ? ' ' + badge('re-consent required') : '') : '<span class="muted">—</span>') + '</td>' + roundCells + '<td class="xs muted">' + esc(note) + '</td></tr>';
     }).join('');
-    return pageHeader(project().name, 'Participants & access', 'Participants are codes, not names. Private links are shown once; any contact email is stored separately and hidden.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-provision">' + icon('id-card', 'ico-sm') + ' Provision participant</button>') + panel('Participants', 'Each code belongs to this study only.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Participant</th><th>Status</th><th>Invited</th><th>Consent</th><th>Wave 1</th><th>Wave 2</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'id-card');
+    return pageHeader(project().name, 'Participants & access', 'Fictional participant codes and round-specific progress. Links created here are demo-only and cannot grant access to the real study.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-provision">' + icon('id-card', 'ico-sm') + ' Provision participant</button>') + panel('Participants', 'Historical progress is preserved; only accepted donations count toward the current round.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Participant</th><th>Status</th><th>Invited</th><th>Consent</th>' + D.ROUNDS.map((round) => '<th>' + esc(round.name) + '</th>').join('') + '<th></th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'id-card');
   }
 
   function screenAudit() {
@@ -283,9 +331,9 @@
     const rows = D.SOURCES.map((s) => {
       const p = rel.sourcePolicies.find((x) => x.sourceId === s.id);
       const summary = p && p.mode === 'donation' ? p.categories.map((c) => (c.enabled ? '<div><b>' + esc(c.id) + '</b>: ' + c.fields.map((f) => f.mode === 'prohibited' ? '<s>' + esc(f.id) + '</s>' : esc(f.id) + (f.mode === 'optional' ? (f.defaultIncluded ? ' (on)' : ' (off)') : '')).join(', ') + '</div>' : '<div><s>' + esc(c.id) + '</s> disabled</div>')).join('') : '<span class="muted">—</span>';
-      return '<tr><td><strong>' + esc(s.displayName) + '</strong><div class="xs muted">' + badge(s.capabilityStatus) + '</div></td><td>' + badge(p ? p.mode : 'disabled') + '</td><td>' + (p && p.required ? 'Yes' : 'No') + '</td><td class="xs">' + summary + '</td></tr>';
+      return '<tr><td><strong>' + esc(s.displayName) + '</strong><div class="xs muted">' + badge(s.capabilityStatus) + '</div></td><td>' + badge(p ? p.mode : 'disabled') + '</td><td>' + (App.requiredSourceIds().includes(s.id) ? 'Yes' : 'No') + '</td><td class="xs">' + summary + '</td></tr>';
     }).join('');
-    return pageHeader(project().name, 'Sources & data policy', 'Choose which services this study uses and which groups and details it may collect. A study can only narrow what the software already supports.') + panel('Version ' + rel.version + ' data policy', 'Read-only in this demo. In the product, edits here show up in Review & publish and require participants to agree again.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Source</th><th>Mode</th><th>Required</th><th>Data policy</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'database');
+    return pageHeader(project().name, 'Sources & data policy', 'This study includes all available approved records, all dates and every approved field when present. Participants may exclude individual records, not fields or categories.') + panel('Version ' + rel.version + ' data policy', 'Read-only demo. Required-source labels include the effective ' + S.round.name + ' requirements. Facebook search words and potentially private group links are explicitly disclosed in the scope notice.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Source</th><th>Mode</th><th>Required in ' + esc(S.round.name) + '</th><th>Data policy</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'database');
   }
 
   function screenAdministrators() {
@@ -299,7 +347,7 @@
 
   function screenFeedback() {
     const entries = [
-      { rating: 5, screen: 'Choose your data', comment: 'Liked that I could remove everything with one word instead of scrolling.', status: 'reviewed' },
+      { rating: 5, screen: 'Review and donate', comment: 'The short summary helped, and I could open the list to remove one record.', status: 'reviewed' },
       { rating: 4, screen: 'Add your file', comment: 'Took me a minute to find the ZIP in Downloads; the file name hint helped.', status: 'unreviewed' },
       { rating: 4, screen: 'Review your donation', comment: 'The fingerprint idea is reassuring even if I do not fully get it.', status: 'unreviewed' },
     ];
@@ -323,7 +371,7 @@
       '<div style="grid-column:1/-1;display:contents"><div class="admin-mobile-header"><button type="button" class="icon-btn" aria-label="Open administrator navigation" aria-expanded="' + A.navOpen + '" data-action="a-nav-toggle">' + icon('list') + '</button><span><strong>DataDonate</strong><small>Administration</small></span></div></div>' +
       '<button type="button" class="admin-nav-scrim" aria-label="Close administrator navigation" data-action="a-nav-toggle"></button>' +
       sidebar() +
-      '<main class="admin-main" id="admin-main">' + body + '</main>';
+      '<main class="admin-main" id="admin-main"><p class="xs muted">Offline simulation · fictional accounts and records · no real authentication, uploads, emails or administrative changes.</p>' + body + '</main>';
     App.syncHash('admin', A.screen);
     if (opts && opts.focus) {
       const h1 = shell.querySelector('.admin-main h1');
@@ -363,6 +411,10 @@
     A.filters.platform = el.value;
     renderAdmin();
   };
+  App.changes['a-filter-round'] = (el) => {
+    A.filters.round = el.value;
+    renderAdmin();
+  };
   App.actions['a-stepup'] = async () => {
     A.stepUpUntil = 0;
     if (await requireStepUp()) renderAdmin();
@@ -395,7 +447,7 @@
     const kind = el.dataset.kind;
     const rel = activeRelease();
     const change = kind === 'consent'
-      ? { section: 'Consent', summary: 'Consent wording updated: clarified the retention period and added the ChatGPT example (document ' + bumpVersion(rel.consentVersion) + ').', material: true }
+      ? { section: 'Consent', summary: 'Simulated consent wording change: clarified the retention period (new demo document ' + bumpVersion(rel.consentVersion) + '). Earlier documents remain unchanged.', material: true }
       : kind === 'contact'
         ? { section: 'Project setup', summary: 'Coordinator contact changed to study-team@oasislab.example. Contact-only change; consent stays valid.', material: false }
         : { section: 'Participant guides', summary: 'YouTube guide step 3 wording refreshed against the current Takeout layout.', material: false };
@@ -409,9 +461,7 @@
   };
 
   function bumpVersion(v) {
-    const parts = String(v).split('.');
-    parts[parts.length - 1] = String(Number(parts[parts.length - 1]) + 1);
-    return parts.join('.');
+    return String(v).replace(/\d+(?=\D*$)/, (part) => String(Number(part) + 1));
   }
 
   App.actions['a-publish'] = async () => {
@@ -424,10 +474,10 @@
     }
     const rel = activeRelease();
     const nextVersion = Math.max(...S.releases.map((r) => r.version)) + 1;
-    const result = await App.dialog({ title: 'Publish release v' + nextVersion + '?', body: '<p>Publication atomically changes the configuration used for new participant sessions and donation attempts. Published releases are immutable.</p>' + (material ? '<p><strong>This release requires re-consent.</strong> Active participants will see the consent step again before their next donation.</p>' : '<p>Non-material changes only: existing consents remain valid.</p>'), confirmLabel: 'Verify and publish' });
+    const result = await App.dialog({ title: 'Simulate publishing release v' + nextVersion + '?', body: '<p>This changes only the in-memory demo. No real project is published. The product uses immutable releases and guarded publication.</p>' + (material ? '<p><strong>This release requires re-consent.</strong> The demo participant will see the consent step again before the next donation.</p>' : '<p>Non-material changes only: existing consents remain valid.</p>'), confirmLabel: 'Verify and simulate' });
     if (!result.ok) return;
     if (!(await requireStepUp())) return;
-    const release = {
+    const release = Object.assign({}, JSON.parse(JSON.stringify(rel)), {
       id: 'rel_v' + nextVersion,
       projectId: rel.projectId,
       version: nextVersion,
@@ -437,10 +487,10 @@
       supersedesReleaseId: rel.id,
       requiresReconsent: material,
       consentVersion: material ? A.release.consentVersionDraft : rel.consentVersion,
-      sourcePolicies: rel.sourcePolicies,
-      material: Object.assign({}, rel.material, { consentVersion: material ? A.release.consentVersionDraft : rel.consentVersion, contact: changes.some((c) => c.section === 'Project setup') ? 'study-team@oasislab.example' : undefined }),
+      sourcePolicies: JSON.parse(JSON.stringify(rel.sourcePolicies)),
+      material: Object.assign({}, JSON.parse(JSON.stringify(rel.material)), { consentVersion: material ? A.release.consentVersionDraft : rel.consentVersion }, changes.some((c) => c.section === 'Project setup') ? { contact: 'study-team@oasislab.example' } : {}),
       changes: changes.slice(),
-    };
+    });
     rel.status = 'superseded';
     S.releases.push(release);
     S.activeReleaseId = release.id;
@@ -452,17 +502,19 @@
     A.release.reconsentAck = false;
     A.release.consentVersionDraft = null;
     renderAdmin();
-    App.toast('Release v' + nextVersion + ' is live. Policy hash ' + E.shortHash(App.hashesFor(release.id).materialHash, 8, 4) + (material ? ' · participants must re-consent.' : '.'));
+    App.toast('Demo release v' + nextVersion + ' is active in this page only. Policy hash ' + E.shortHash(App.hashesFor(release.id).materialHash, 8, 4) + (material ? ' · participants must re-consent.' : '.'));
   };
 
   App.actions['a-propose-deletion'] = async (el) => {
     const w = A.withdrawals.find((x) => x.id === el.dataset.wd);
     if (!w) return;
-    const count = w.acceptedDonations !== undefined ? w.acceptedDonations : A.donations.filter((d) => d.participantId === w.participantId && d.status === 'accepted').length;
-    const result = await App.dialog({ title: 'Propose deletion for ' + w.participantId + '?', body: '<p>Exact scope: ' + esc(S.round.roundKey) + ' · ' + count + ' accepted donation' + (count === 1 ? '' : 's') + '. A different owner must approve before the worker deletes primary payload objects and writes deletion evidence.</p>', fields: [{ name: 'reason', label: 'Reason', type: 'textarea', required: true, placeholder: 'Participant withdrawal request received ' + E.formatDate(w.requestedAt) }], confirmLabel: 'Propose deletion' });
+    const scopeRoundKey = w.roundKey || null;
+    const count = A.donations.filter((d) => d.participantId === w.participantId && d.status === 'accepted' && (!scopeRoundKey || d.roundKey === scopeRoundKey)).length;
+    const scope = (scopeRoundKey ? roundName(scopeRoundKey) : 'All rounds in this study') + ' · ' + count + ' accepted donation' + (count === 1 ? '' : 's');
+    const result = await App.dialog({ title: 'Propose simulated deletion for ' + w.participantId + '?', body: '<p>Scope: ' + esc(scope) + '. A different demo owner must approve. Only fictional metadata changes; no real files are deleted.</p>', fields: [{ name: 'reason', label: 'Reason', type: 'textarea', required: true, placeholder: 'Participant withdrawal request received ' + E.formatDate(w.requestedAt) }], confirmLabel: 'Propose deletion' });
     if (!result.ok) return;
     if (!(await requireStepUp())) return;
-    w.deletionJob = { id: 'job_del_' + E.fnv1a(w.id).toString(16).slice(0, 4), status: 'pending_approval', proposedBy: A.user.username, proposedAt: App.nowIso(), reason: result.values.reason, scope: S.round.roundKey + ' · ' + count + ' accepted donation' + (count === 1 ? '' : 's') };
+    w.deletionJob = { id: 'job_del_' + E.fnv1a(w.id).toString(16).slice(0, 4), status: 'pending_approval', proposedBy: A.user.username, proposedAt: App.nowIso(), reason: result.values.reason, roundKey: scopeRoundKey, scope };
     w.status = 'processing';
     App.addAudit({ action: 'deletion_job.proposed', actor: 'admin ' + A.user.username, subject: w.deletionJob.id, summary: 'Withdrawal deletion proposed for ' + w.participantId + ' (' + w.deletionJob.scope + '). Awaiting approval by a different owner.' });
     renderAdmin();
@@ -493,7 +545,8 @@
           job.completedAt = App.nowIso();
           w.status = 'completed';
           A.donations.forEach((d) => {
-            if (d.participantId === w.participantId && d.status === 'accepted') d.status = 'deleted';
+            const roundKey = job.roundKey || w.roundKey || (D.ROUNDS.find((r) => String(job.scope).startsWith(r.roundKey + ' ·')) || {}).roundKey;
+            if (d.participantId === w.participantId && d.status === 'accepted' && (!roundKey || d.roundKey === roundKey)) d.status = 'deleted';
           });
           App.addAudit({ action: 'deletion.completed', actor: 'system worker', subject: job.id, summary: 'Primary payload objects deleted through stored, project-bound metadata; donations marked deleted; deletion evidence written.' });
           if (A.screen === 'withdrawals') renderAdmin();
@@ -504,11 +557,11 @@
   };
 
   App.actions['a-provision'] = async () => {
-    const result = await App.dialog({ title: 'Provision a participant', body: '<p>Creates a pseudonymous participant in <strong>' + esc(S.round.name) + '</strong>. Optional contact email would be encrypted independently and masked everywhere.</p>', fields: [{ name: 'alias', label: 'Internal alias (optional)', type: 'text', placeholder: 'e.g. cohort-b-12' }], confirmLabel: 'Create and show link once' });
+    const result = await App.dialog({ title: 'Provision a demo participant', body: '<p>Adds a fictional participant in <strong>' + esc(S.round.name) + '</strong> to this page only. No account, email or real access link is created.</p>', fields: [{ name: 'alias', label: 'Fictional internal alias (optional)', type: 'text', placeholder: 'e.g. cohort-b-12' }], confirmLabel: 'Create demo link' });
     if (!result.ok) return;
     const n = 417 + A.participants.length;
     const id = 'P-0' + n;
-    A.participants.push({ id, status: 'invited', invitedAt: S.today, consentVersion: null, rounds: { 'wave-1': 'none', 'wave-2': 'none' }, note: result.values.alias || '', isNew: true });
+    A.participants.push({ id, status: 'invited', invitedAt: S.today, consentVersion: null, consentReleaseId: null, rounds: Object.fromEntries(D.ROUNDS.map((r) => [r.roundKey, 'none'])), note: result.values.alias || '', isNew: true });
     const bytes = new Uint8Array(32);
     (window.crypto || {}).getRandomValues ? window.crypto.getRandomValues(bytes) : bytes.fill(7);
     const token = btoa(String.fromCharCode.apply(null, bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');

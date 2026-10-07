@@ -1,10 +1,10 @@
 /*
  * DataDonate demo — synthetic data
  *
- * Every value in this file is fictitious. Project names, governance
- * references, participants, donations, receipts and activity records are
- * generated for the tour and do not correspond to any real study, person,
- * account or file. Candidate activity is generated deterministically from a
+ * The visible study name and approved source/field scope mirror the product.
+ * All identities, governance examples, dates, donations, receipts and activity
+ * records are synthetic: no real participant, account, export or access token
+ * is present. Candidate activity is generated deterministically from a
  * seeded PRNG so the tour shows the same numbers and fingerprints every time.
  */
 window.DEMO_DATA = (function () {
@@ -20,7 +20,7 @@ window.DEMO_DATA = (function () {
       id: 'tiktok',
       displayName: 'TikTok',
       letter: 'T',
-      description: 'Videos you watched or liked, and searches you made — search words start off',
+      description: 'This study includes watched-video dates and links only',
       capabilityStatus: 'donation_ready',
       enabled: true,
       exportFormatVerifiedOn: '2026-07-17',
@@ -34,15 +34,15 @@ window.DEMO_DATA = (function () {
       },
       exportGuide: {
         version: '2026-08-24',
-        intro: 'TikTok lets you request a copy of your own activity data.',
+        intro: 'TikTok lets you request a copy of your own activity data. This study includes watched-video dates and links only. In this offline demo, use the synthetic example; do not provide a real export.',
         steps: [
           { title: 'Open TikTok and go to your profile', detail: 'Use the Profile button at the bottom of the TikTok app.' },
           { title: 'Open Settings and privacy', detail: 'Open the menu, then choose Settings and privacy.' },
           { title: 'Find Download your data', detail: 'Open Account, then choose Download your data.' },
           {
-            title: 'Select the activity categories named in your project guide',
+            title: 'Choose Your Activity only',
             detail:
-              'On Select data to download, choose Your Activity. Choose Likes and Favorites only when your project guide asks for liked-video activity. Leave Comments, Direct Messages, Income + Wallet, Location Reviews, Posts, Profile and Settings, TikTok LIVE, and TikTok Shop unchecked.',
+              'On Select data to download, choose Your Activity. Leave Likes and Favorites, Comments, Direct Messages, Income + Wallet, Location Reviews, Posts, Profile and Settings, TikTok LIVE, and TikTok Shop unchecked. Search history is not donated to this study even if it is included in the export.',
           },
           { title: 'Choose JSON and request the file', detail: 'Choose JSON rather than HTML, then tap Request data.' },
           {
@@ -92,17 +92,25 @@ window.DEMO_DATA = (function () {
       capabilityStatus: 'donation_ready',
       enabled: true,
       exportFormatVerifiedOn: '2026-08-31',
+      fileName: 'synthetic-instagram-export.zip',
+      archive: {
+        kind: 'Original ZIP · JSON',
+        entries: ['ads_information/ads_and_topics/videos_watched.json', 'ads_information/ads_and_topics/ads_viewed.json', 'personal_information/profile.json'],
+        allowlisted: ['ads_information/ads_and_topics/videos_watched.json'],
+        sectionsTotal: 3,
+        sectionsRead: ['ads_information/ads_and_topics/videos_watched.json'],
+      },
       exportGuide: {
-        version: '2026-08-31',
+        version: '2026-10-07',
         intro:
-          'Instagram can prepare a ZIP containing watched-video activity. Choose Ads and topics only. DataDonate opens the ZIP on your device, reads only the watched-video file, and never uploads the full archive.',
+          'In the real application, use the standard Available information export and choose Ads and topics only. Only dated watched-video records and their post or Reel links are included. This offline demo uses synthetic records; do not provide a real export.',
         steps: [
           { title: 'Open Accounts Center from Instagram', detail: 'Open your Instagram profile, open the menu, then choose Accounts Center.' },
           { title: 'Start an information export', detail: 'Choose Your information and permissions, Export your information, then Create export.' },
           { title: 'Choose only your Instagram profile', detail: 'Select the Instagram profile you want to use, then choose Export to device.' },
-          { title: 'Choose only Ads and topics', detail: 'Open Customize information, deselect everything, then under Ads information select Ads and topics.' },
-          { title: 'Use JSON, the project date range, and Low media quality', detail: 'Choose the date range named in your project instructions, JSON for the format, and Low for media quality.' },
-          { title: 'Download the original ZIP', detail: 'Save every ZIP part without unzipping, renaming, or changing its contents.' },
+          { title: 'Choose Available information and only Ads and topics', detail: 'Open Customize information, deselect everything, then under Ads information select Ads and topics. Leave other categories unchecked. Do not request Data Logs.' },
+          { title: 'Use JSON, All time, and Low media quality', detail: 'Choose All time for the date range, JSON for the format, and Low for media quality.' },
+          { title: 'Download the original ZIP', detail: 'Save the ZIP unchanged. In this demo, use the synthetic example instead of opening a real export.' },
         ],
         wait: 'Meta does not promise a fixed preparation time. It may take several days, and ready downloads are available for a limited time.',
       },
@@ -111,27 +119,38 @@ window.DEMO_DATA = (function () {
       id: 'facebook',
       displayName: 'Facebook',
       letter: 'F',
-      description: 'Viewing-history export guide — upload support is being verified',
-      capabilityStatus: 'instructions_only',
-      enabled: false,
+      description: 'Posts and videos shown in your feed, plus main Facebook searches — not confirmed watches',
+      capabilityStatus: 'donation_ready',
+      enabled: true,
+      exportFormatVerifiedOn: '2026-10-07',
+      fileName: 'synthetic-facebook-export.zip',
+      archive: {
+        kind: 'Original ZIP · JSON',
+        entries: ['logged_information/interactions/content_that_has_been_shown_to_you_in_your_feed.json', 'logged_information/search/your_search_history.json', 'logged_information/search/marketplace_search_history.json', 'messages/inbox/synthetic/message.json'],
+        allowlisted: ['logged_information/interactions/content_that_has_been_shown_to_you_in_your_feed.json', 'logged_information/search/your_search_history.json'],
+        sectionsTotal: 4,
+        sectionsRead: ['Feed-shown posts and videos', 'Main Facebook search history'],
+      },
       exportGuide: {
-        version: '2026-08-31',
+        version: '2026-10-07',
         intro:
-          "Facebook's standard export does not provide a verified per-video watch history. DataDonate cannot accept that export until its current structure and privacy boundary are verified.",
+          'Use standard Available information in the real application. Only posts and videos recorded as shown in the feed, their links and times, and main search words and times are included. Shown does not mean watched. Links can identify private or group posts, and search words can be sensitive. This demo only uses synthetic examples.',
         steps: [
           { title: 'Open Accounts Center from Facebook', detail: 'Open your profile menu, choose Settings and privacy, Settings, then Accounts Center.' },
-          { title: 'Do not upload a Facebook archive yet', detail: 'Facebook remains instructions-only. The platform will not show an upload control or accept a Facebook ZIP.' },
+          { title: 'Start an information export', detail: 'Choose Your information and permissions, Export your information, then Create export.' },
+          { title: 'Choose only your Facebook profile', detail: 'Select the Facebook profile and choose Export to device.' },
+          { title: 'Choose standard Available information', detail: 'Under Customize information, select Search, Reels, Posts, Interactions, Other logged information, Other activity, and Recommendations where available. Only the two verified feed-shown and main-search files are read by the real adapter.' },
+          { title: 'Use JSON, All time, and Low media quality', detail: 'Start the standard Available information export. Do not request Data Logs.' },
+          { title: 'Save the original ZIP', detail: 'Keep the ZIP unchanged. If several parts are supplied, keep them and contact the coordinator; multi-part merging is not supported. Use only the synthetic sample in this demo.' },
         ],
-        wait: 'Facebook upload support remains unavailable until a current Data Logs export is verified with synthetic fixtures and privacy tests.',
+        wait: 'Preparation time varies. Download promptly when Meta says the standard export is ready. The demo does not request or download anything.',
       },
-      verificationNeeded:
-        'Needs a current Data Logs export to verify its content-viewed files, HTML/JSON structures, split-archive behavior, paths, and fields, plus synthetic fixtures, strict allowlisting, and redaction tests.',
     },
     {
       id: 'youtube',
       displayName: 'YouTube',
       letter: 'Y',
-      description: 'Videos and posts you viewed, and searches you made — labels, titles, and search words start off',
+      description: 'Watched-video dates, links, titles and channel names; viewed-post dates, links and titles',
       capabilityStatus: 'donation_ready',
       enabled: true,
       exportFormatVerifiedOn: '2026-07-24',
@@ -164,7 +183,7 @@ window.DEMO_DATA = (function () {
       exportGuide: {
         version: '2026-08-24',
         intro:
-          'Google Takeout can prepare a ZIP containing YouTube video, community-post, and search history. Your project controls which approved activity can be donated, and sensitive text starts off on your device.',
+          'Google Takeout can prepare a ZIP containing YouTube history. This study includes watched-video dates, links, titles and channel names, plus viewed-post dates, links and titles, when available. Searches are not included. In this offline demo, use the synthetic example instead of a real export.',
         steps: [
           { title: 'Open Google Takeout and sign in', detail: 'Go to takeout.google.com using the Google account you use for YouTube.' },
           {
@@ -381,11 +400,44 @@ window.DEMO_DATA = (function () {
           description: 'Dated videos-watched records from the Ads and topics export.',
           fields: [
             field('timestamp', 'Date and time watched', 'When Meta logged the video as watched.', 'low', true, true),
-            field('contentRef', 'Link to the post or Reel', 'A canonical public Instagram reference.', 'medium', false, true),
+            field('contentRef', 'Link to the post or Reel', 'A canonical Instagram post or Reel link, when supplied.', 'medium', false, true),
           ],
         },
       ],
       systemExcluded: ['Captions, titles and account identifiers', 'Advertiser and brand-partner details', 'Messages, contacts, followers and searches', 'Login, device and location records'],
+      unsupported: [],
+      presets: [],
+    },
+    facebook: {
+      adapterVersion: '1.0.0',
+      schemaVersion: 'meta-facebook-json-v1',
+      categories: [
+        {
+          id: 'posts_shown', label: 'Posts shown in your feed',
+          description: 'Posts recorded as shown in the feed; not proof they were read.',
+          fields: [
+            field('timestamp', 'Activity date and time', 'When Facebook recorded the activity.', 'low', true, true),
+            field('contentRef', 'Link to the content', 'The supplied canonical content link; group links need not be public.', 'medium', false, true),
+          ],
+        },
+        {
+          id: 'videos_shown', label: 'Videos shown in your feed',
+          description: 'Videos recorded as shown in the feed; not confirmed watches or watch duration.',
+          fields: [
+            field('timestamp', 'Activity date and time', 'When Facebook recorded the activity.', 'low', true, true),
+            field('contentRef', 'Link to the content', 'The supplied canonical video or group-post link.', 'medium', false, true),
+          ],
+        },
+        {
+          id: 'searches', label: 'Searches you made',
+          description: 'Main Facebook searches, not Marketplace searches.',
+          fields: [
+            field('timestamp', 'Activity date and time', 'When Facebook recorded the search.', 'low', true, true),
+            field('searchTerm', 'What you searched for', 'Exact query words; these may contain personal or sensitive information.', 'high', false, false, true),
+          ],
+        },
+      ],
+      systemExcluded: ['Private Meta identifiers, author descriptions and search-event titles', 'Messages, contacts and unrelated account data', 'Marketplace searches and unrelated export files', 'Links shown in the feed and aggregate viewing-time summaries', 'Advertising, recommendations, login, device and location information', 'Photos, videos and other media contents'],
       unsupported: [],
       presets: [],
     },
@@ -426,35 +478,34 @@ window.DEMO_DATA = (function () {
   const PROJECTS = [
     {
       id: 'prj_a4f1e2',
-      slug: 'screen-exposure-2026',
-      name: 'Screen Exposure and Wellbeing 2026',
-      institution: 'OASIS Lab',
+      slug: 'social-media-data-donation-demo',
+      name: 'Social Media Data Donation',
+      institution: 'Synthetic offline study demonstration',
       purpose:
-        'This study looks at how the videos and posts people encounter on everyday apps relate to self-reported wellbeing over time.',
-      governanceStatus: 'approved',
-      governanceReference: 'DEMO-IRB-2026-041',
-      governanceApprovedAt: '2026-02-20',
-      governanceExpiresAt: '2027-02-19',
+        'An offline walkthrough of the current social-media donation flow. All people and activity shown here are synthetic; this page does not enroll anyone or collect research data.',
+      governanceStatus: 'not_required',
+      governanceReference: 'DEMO ONLY — no research enrollment or approval claim',
       lifecycle: 'active',
       visibility: 'unlisted',
       timezone: 'America/Los_Angeles',
-      activeReleaseId: 'rel_v2',
-      coordinatorEmail: 'coordinator@oasislab.example',
+      activeReleaseId: 'rel_v3',
+      participantReviewMode: 'record_exclusions_only',
+      coordinatorEmail: 'coordinator@demo.invalid',
       estimatedMinutes: 20,
       donationsCloseAt: '2026-12-15T23:59:00-08:00',
       participantAccessEndsAt: '2027-01-15T23:59:00-08:00',
       communicationMode: 'platform_email',
-      compensation: { mode: 'flat_completion', amountCents: 2000, currency: 'USD' },
+      compensation: { mode: 'none', amountCents: 0, currency: 'USD' },
       retention: { anchor: 'round_close', days: 365 },
       deletion: { slaDays: 30, slaUnit: 'business_days' },
       createdAt: '2026-01-14T18:12:00Z',
-      updatedAt: '2026-09-12T20:41:00Z',
+      updatedAt: '2026-10-07T18:00:00Z',
     },
     {
       id: 'prj_b7c209',
       slug: 'assistant-diaries-2026',
       name: 'Conversational AI in Everyday Life',
-      institution: 'OASIS Lab',
+      institution: 'Synthetic offline study demonstration',
       purpose: 'A diary-style study of how people use AI assistants for everyday tasks.',
       governanceStatus: 'pending',
       governanceReference: 'DEMO-IRB-2026-077',
@@ -462,7 +513,7 @@ window.DEMO_DATA = (function () {
       visibility: 'unlisted',
       timezone: 'America/Los_Angeles',
       activeReleaseId: null,
-      coordinatorEmail: 'diaries@oasislab.example',
+      coordinatorEmail: 'diaries@demo.invalid',
       communicationMode: 'external',
       compensation: { mode: 'none', amountCents: 0, currency: 'USD' },
       retention: { anchor: 'project_close', days: 730 },
@@ -482,11 +533,11 @@ window.DEMO_DATA = (function () {
     {
       sourceId: 'tiktok',
       mode: 'donation',
-      required: true,
+      required: false,
       categories: [
-        { id: 'watch_history', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('contentRef', 'optional', true)] },
-        { id: 'likes', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('contentRef', 'optional', true)] },
-        { id: 'searches', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('searchTerm', 'optional', false)] },
+        { id: 'watch_history', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('contentRef', 'mandatory', true)] },
+        { id: 'likes', enabled: false, fields: [fieldPolicy('timestamp', 'prohibited'), fieldPolicy('contentRef', 'prohibited')] },
+        { id: 'searches', enabled: false, fields: [fieldPolicy('timestamp', 'prohibited'), fieldPolicy('searchTerm', 'prohibited')] },
       ],
     },
     {
@@ -499,38 +550,38 @@ window.DEMO_DATA = (function () {
           enabled: true,
           fields: [
             fieldPolicy('timestamp', 'mandatory'),
-            fieldPolicy('title', 'prohibited'),
-            fieldPolicy('channelName', 'optional', false),
-            fieldPolicy('contentRef', 'optional', true),
+            fieldPolicy('title', 'mandatory', true),
+            fieldPolicy('channelName', 'mandatory', true),
+            fieldPolicy('contentRef', 'mandatory', true),
           ],
         },
-        { id: 'post_views', enabled: false, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('contentRef', 'prohibited'), fieldPolicy('title', 'prohibited')] },
-        { id: 'searches', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('searchTerm', 'optional', false)] },
+        { id: 'post_views', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('contentRef', 'mandatory', true), fieldPolicy('title', 'mandatory', true)] },
+        { id: 'searches', enabled: false, fields: [fieldPolicy('timestamp', 'prohibited'), fieldPolicy('searchTerm', 'prohibited')] },
       ],
     },
-    {
-      sourceId: 'chatgpt',
-      mode: 'donation',
-      required: false,
-      categories: [
-        { id: 'conversations', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('messageCount', 'optional', true), fieldPolicy('title', 'prohibited')] },
-        { id: 'prompts', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('text', 'optional', true)] },
-        { id: 'responses', enabled: true, fields: [fieldPolicy('timestamp', 'mandatory'), fieldPolicy('text', 'optional', true)] },
-      ],
-    },
-    { sourceId: 'instagram', mode: 'guide_only', required: false, categories: [] },
-    { sourceId: 'facebook', mode: 'guide_only', required: false, categories: [] },
+    { sourceId: 'chatgpt', mode: 'disabled', required: false, categories: [] },
+    { sourceId: 'instagram', mode: 'disabled', required: false, categories: [] },
+    { sourceId: 'facebook', mode: 'disabled', required: false, categories: [] },
     { sourceId: 'twitter', mode: 'disabled', required: false, categories: [] },
     { sourceId: 'reddit', mode: 'disabled', required: false, categories: [] },
   ];
 
-  const V1_SOURCE_POLICIES = V2_SOURCE_POLICIES.map((p) => {
-    if (p.sourceId === 'chatgpt') return { sourceId: 'chatgpt', mode: 'guide_only', required: false, categories: [] };
-    if (p.sourceId === 'youtube') {
-      return JSON.parse(JSON.stringify(p).replace('"id":"channelName","mode":"optional","defaultIncluded":false', '"id":"channelName","mode":"prohibited"'));
-    }
-    return p;
+  const V1_SOURCE_POLICIES = JSON.parse(JSON.stringify(V2_SOURCE_POLICIES));
+  const V3_SOURCE_POLICIES = V2_SOURCE_POLICIES.map((policy) => {
+    if (!['instagram', 'facebook'].includes(policy.sourceId)) return JSON.parse(JSON.stringify(policy));
+    const definitions = policy.sourceId === 'instagram'
+      ? [{ id: 'videos_watched', fields: ['timestamp', 'contentRef'] }]
+      : [
+          { id: 'posts_shown', fields: ['timestamp', 'contentRef'] },
+          { id: 'videos_shown', fields: ['timestamp', 'contentRef'] },
+          { id: 'searches', fields: ['timestamp', 'searchTerm'] },
+        ];
+    return { sourceId: policy.sourceId, mode: 'donation', required: false,
+      categories: definitions.map((category) => ({ id: category.id, enabled: true,
+        fields: category.fields.map((id) => fieldPolicy(id, 'mandatory', true)) })) };
   });
+
+  const PARTICIPANT_SCOPE_NOTICE = 'Demo of the current study scope: TikTok and YouTube are required for Round 2; Instagram and Facebook are optional. All approved available fields and all dates are included. Remove individual records before explicitly confirming. Instagram includes watched-video dates and links. Facebook includes dates and links for posts/videos shown in the feed, plus main search dates and exact search words. Shown in the feed does not mean watched or read. Group links and search words may reveal sensitive information. Missing values remain absent; no data are inferred. Participation is unpaid. This demo generates only synthetic data locally and sends nothing.';
 
   const RELEASES = [
     {
@@ -539,14 +590,15 @@ window.DEMO_DATA = (function () {
       version: 1,
       status: 'superseded',
       publishedAt: '2026-03-02T17:04:00Z',
-      publishedBy: 'p.jamie',
+      publishedBy: 'demo.owner',
       supersedesReleaseId: null,
       requiresReconsent: false,
       consentVersion: '1.0',
       sourcePolicies: V1_SOURCE_POLICIES,
+      participantReviewMode: 'record_exclusions_only',
       material: {
         consentVersion: '1.0',
-        compensation: { mode: 'flat_completion', amountCents: 2000, currency: 'USD' },
+        compensation: { mode: 'none', amountCents: 0, currency: 'USD' },
         retention: { anchor: 'round_close', days: 365 },
         deletion: { slaDays: 30, slaUnit: 'business_days' },
       },
@@ -556,24 +608,38 @@ window.DEMO_DATA = (function () {
       id: 'rel_v2',
       projectId: 'prj_a4f1e2',
       version: 2,
-      status: 'active',
+      status: 'superseded',
       publishedAt: '2026-05-18T16:20:00Z',
-      publishedBy: 'p.jamie',
+      publishedBy: 'demo.owner',
       supersedesReleaseId: 'rel_v1',
       requiresReconsent: true,
       consentVersion: '2.0',
       sourcePolicies: V2_SOURCE_POLICIES,
+      participantReviewMode: 'record_exclusions_only',
       material: {
         consentVersion: '2.0',
-        compensation: { mode: 'flat_completion', amountCents: 2000, currency: 'USD' },
+        compensation: { mode: 'none', amountCents: 0, currency: 'USD' },
         retention: { anchor: 'round_close', days: 365 },
         deletion: { slaDays: 30, slaUnit: 'business_days' },
       },
       changes: [
-        { section: 'Sources & data policy', summary: "ChatGPT enabled for donation: conversation dates, message counts, the messages you wrote and ChatGPT's replies (titles stay out).", material: true },
-        { section: 'Sources & data policy', summary: 'YouTube channel name became an optional field, off by default.', material: true },
-        { section: 'Consent', summary: 'Consent document 2.0 describes the added ChatGPT scope.', material: true },
+        { section: 'Sources & data policy', summary: 'TikTok watch dates/links and YouTube watch/post dates with approved available labels and links.', material: true },
+        { section: 'Participant review', summary: 'All dates included. Individual records may be removed; no field, category, or bulk filters.', material: false },
+        { section: 'Consent', summary: 'Synthetic consent example for the unpaid donation workflow.', material: true },
         { section: 'Participant guides', summary: 'TikTok guide re-checked against current app menus.', material: false },
+      ],
+    },
+    {
+      id: 'rel_v3', projectId: 'prj_a4f1e2', version: 3, status: 'active',
+      publishedAt: '2026-10-07T18:00:00Z', publishedBy: 'demo.owner',
+      supersedesReleaseId: 'rel_v2', requiresReconsent: true, consentVersion: '3.0-demo',
+      participantReviewMode: 'record_exclusions_only', participantDataScopeNotice: PARTICIPANT_SCOPE_NOTICE,
+      sourcePolicies: V3_SOURCE_POLICIES,
+      material: { consentVersion: '3.0-demo', compensation: { mode: 'none', amountCents: 0, currency: 'USD' }, retention: { anchor: 'round_close', days: 365 }, deletion: { slaDays: 30, slaUnit: 'business_days' } },
+      changes: [
+        { section: 'Optional sources', summary: 'Instagram watched-video dates/links and Facebook feed-shown dates/links plus main search dates/words added to the same Round 2.', material: true },
+        { section: 'Privacy disclosure', summary: 'Facebook shown-in-feed is not watching. Search words and supplied group links can be sensitive.', material: true },
+        { section: 'Preserved requirements', summary: 'TikTok and YouTube remain required. Earlier accepted donations are preserved; optional Meta sources do not create a new round.', material: false },
       ],
     },
   ];
@@ -581,8 +647,8 @@ window.DEMO_DATA = (function () {
   const ROUNDS = [
     {
       id: 'rnd_w1',
-      roundKey: 'wave-1',
-      name: 'Wave 1 · Spring 2026',
+      roundKey: 'initial-collection',
+      name: 'Initial collection · synthetic history',
       status: 'closed',
       startsAt: '2026-03-02',
       donationsCloseAt: '2026-06-30',
@@ -595,13 +661,14 @@ window.DEMO_DATA = (function () {
     },
     {
       id: 'rnd_w2',
-      roundKey: 'wave-2',
-      name: 'Wave 2 · Fall 2026',
+      roundKey: 'data-donation-round-2',
+      name: 'Round 2',
+      projectReleaseId: 'rel_v3',
       status: 'active',
       startsAt: '2026-09-01',
       donationsCloseAt: '2026-12-15',
       participantAccessEndsAt: '2027-01-15',
-      requiredSourceIds: ['youtube'],
+      requiredSourceIds: ['tiktok', 'youtube'],
       eligibilityMode: 'all_active_participants',
       completed: 3,
       partial: 4,
@@ -614,35 +681,38 @@ window.DEMO_DATA = (function () {
   /* ------------------------------------------------------------------ */
 
   const PARTICIPANTS = [
-    { id: 'P-0417', status: 'active', invitedAt: '2026-09-02', consentVersion: null, rounds: { 'wave-1': 'complete', 'wave-2': 'none' }, contact: 'masked', note: 'Live tour participant' },
-    { id: 'P-0418', status: 'active', invitedAt: '2026-09-02', consentVersion: '2.0', rounds: { 'wave-1': 'complete', 'wave-2': 'complete' } },
-    { id: 'P-0419', status: 'active', invitedAt: '2026-09-02', consentVersion: '2.0', rounds: { 'wave-1': 'complete', 'wave-2': 'partial' } },
-    { id: 'P-0420', status: 'invited', invitedAt: '2026-09-03', consentVersion: null, rounds: { 'wave-1': 'none', 'wave-2': 'none' } },
-    { id: 'P-0421', status: 'withdrawn', invitedAt: '2026-03-04', consentVersion: '1.0', rounds: { 'wave-1': 'complete', 'wave-2': 'none' } },
-    { id: 'P-0422', status: 'active', invitedAt: '2026-03-04', consentVersion: '2.0', rounds: { 'wave-1': 'partial', 'wave-2': 'partial' } },
-    { id: 'P-0423', status: 'active', invitedAt: '2026-03-05', consentVersion: '2.0', rounds: { 'wave-1': 'complete', 'wave-2': 'complete' } },
-    { id: 'P-0424', status: 'active', invitedAt: '2026-09-04', consentVersion: '2.0', rounds: { 'wave-1': 'none', 'wave-2': 'partial' } },
-    { id: 'P-0425', status: 'invited', invitedAt: '2026-09-08', consentVersion: null, rounds: { 'wave-1': 'none', 'wave-2': 'none' } },
-    { id: 'P-0426', status: 'active', invitedAt: '2026-03-06', consentVersion: '1.0', rounds: { 'wave-1': 'complete', 'wave-2': 'none' }, note: 'Re-consent pending' },
-    { id: 'P-0427', status: 'active', invitedAt: '2026-09-09', consentVersion: '2.0', rounds: { 'wave-1': 'none', 'wave-2': 'complete' } },
-    { id: 'P-0428', status: 'active', invitedAt: '2026-09-10', consentVersion: '2.0', rounds: { 'wave-1': 'none', 'wave-2': 'partial' } },
+    { id: 'P-0417', status: 'active', invitedAt: '2026-03-02', consentVersion: '1.0', consentReleaseId: 'rel_v1', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'none' }, contact: 'not collected in demo', note: 'Synthetic tour participant' },
+    { id: 'P-0418', status: 'active', invitedAt: '2026-09-02', consentVersion: '3.0-demo', consentReleaseId: 'rel_v3', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'complete' } },
+    { id: 'P-0419', status: 'active', invitedAt: '2026-09-02', consentVersion: '2.0', consentReleaseId: 'rel_v2', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'partial' } },
+    { id: 'P-0420', status: 'invited', invitedAt: '2026-09-03', consentVersion: null, consentReleaseId: null, rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'none' } },
+    { id: 'P-0421', status: 'withdrawn', invitedAt: '2026-03-04', consentVersion: '1.0', consentReleaseId: 'rel_v1', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'none' } },
+    { id: 'P-0422', status: 'active', invitedAt: '2026-03-04', consentVersion: '3.0-demo', consentReleaseId: 'rel_v3', rounds: { 'initial-collection': 'partial', 'data-donation-round-2': 'partial' } },
+    { id: 'P-0423', status: 'active', invitedAt: '2026-03-05', consentVersion: '3.0-demo', consentReleaseId: 'rel_v3', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'complete' } },
+    { id: 'P-0424', status: 'active', invitedAt: '2026-09-04', consentVersion: '2.0', consentReleaseId: 'rel_v2', rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'partial' } },
+    { id: 'P-0425', status: 'invited', invitedAt: '2026-09-08', consentVersion: null, consentReleaseId: null, rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'none' } },
+    { id: 'P-0426', status: 'active', invitedAt: '2026-03-06', consentVersion: '1.0', consentReleaseId: 'rel_v1', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'none' }, note: 'Synthetic re-consent example' },
+    { id: 'P-0427', status: 'active', invitedAt: '2026-09-09', consentVersion: '2.0', consentReleaseId: 'rel_v2', rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'complete' } },
+    { id: 'P-0428', status: 'active', invitedAt: '2026-09-10', consentVersion: '2.0', consentReleaseId: 'rel_v2', rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'partial' } },
   ];
 
   const DONATIONS = [
-    { id: 'don_9c1e4b7a2d3f6081a5c7e9b2', participantId: 'P-0418', platform: 'tiktok', roundKey: 'wave-2', records: 2114, payloadBytes: 236804, createdAt: '2026-09-03T18:22:00Z', status: 'accepted', receiptCode: 'DD-K7M2-Q9RX' },
-    { id: 'don_1f4a8c2e6b9d0357a2c4e6f8', participantId: 'P-0418', platform: 'youtube', roundKey: 'wave-2', records: 3402, payloadBytes: 401117, createdAt: '2026-09-03T18:41:00Z', status: 'accepted', receiptCode: 'DD-3HQV-8NTB' },
-    { id: 'don_7b3d5f9a1c2e4680b1d3f5a7', participantId: 'P-0419', platform: 'tiktok', roundKey: 'wave-2', records: 987, payloadBytes: 110236, createdAt: '2026-09-04T02:15:00Z', status: 'accepted', receiptCode: 'DD-XW4P-2MJ7' },
-    { id: 'don_2e6c8a0f4b1d3579c2e4a6b8', participantId: 'P-0422', platform: 'chatgpt', roundKey: 'wave-2', records: 1204, payloadBytes: 121350, createdAt: '2026-09-05T15:03:00Z', status: 'accepted', receiptCode: 'DD-9BRD-5KCN' },
-    { id: 'don_5a9e1c3b7d2f4680e1c3a5b7', participantId: 'P-0422', platform: 'tiktok', roundKey: 'wave-2', records: 1533, payloadBytes: 171894, createdAt: '2026-09-05T15:27:00Z', status: 'accepted', receiptCode: 'DD-M6TZ-7QGE' },
-    { id: 'don_8d2f4a6c0e3b5791d2f4a6c8', participantId: 'P-0423', platform: 'youtube', roundKey: 'wave-2', records: 5218, payloadBytes: 614352, createdAt: '2026-09-06T21:48:00Z', status: 'accepted', receiptCode: 'DD-R2NF-4HWX' },
-    { id: 'don_3c7a9e1b5d0f2468a3c5e7f9', participantId: 'P-0423', platform: 'tiktok', roundKey: 'wave-2', records: 402, payloadBytes: 45109, createdAt: '2026-09-06T22:03:00Z', status: 'accepted', receiptCode: 'DD-7VJK-3PMQ' },
-    { id: 'don_6b0d2f4a8c1e3579b4d6f8a0', participantId: 'P-0424', platform: 'tiktok', roundKey: 'wave-2', records: 1760, payloadBytes: 197336, createdAt: '2026-09-08T17:36:00Z', status: 'accepted', receiptCode: 'DD-2QSE-9YRB' },
-    { id: 'don_4e8b0c2d6a9f1357e5a7c9d1', participantId: 'P-0424', platform: 'youtube', roundKey: 'wave-2', records: 0, payloadBytes: 0, createdAt: '2026-09-08T17:58:00Z', status: 'failed', receiptCode: null, failureReason: 'checksum_or_length_mismatch' },
-    { id: 'don_0f4c6e8a2b5d7913f6b8d0e2', participantId: 'P-0427', platform: 'youtube', roundKey: 'wave-2', records: 2921, payloadBytes: 343188, createdAt: '2026-09-11T19:12:00Z', status: 'accepted', receiptCode: 'DD-H5WT-6DKA' },
-    { id: 'don_a1c3e5b7d9f02468c7e9b1d3', participantId: 'P-0427', platform: 'tiktok', roundKey: 'wave-2', records: 1188, payloadBytes: 132511, createdAt: '2026-09-11T19:33:00Z', status: 'accepted', receiptCode: 'DD-NQ8X-2FMV' },
-    { id: 'don_b2d4f6a8c0e13579d8f0b2c4', participantId: 'P-0428', platform: 'tiktok', roundKey: 'wave-2', records: 640, payloadBytes: 71802, createdAt: '2026-09-15T00:06:00Z', status: 'uploaded', receiptCode: null },
-    { id: 'don_c3e5a7b9d1f24680e9a1c3d5', participantId: 'P-0419', platform: 'youtube', roundKey: 'wave-2', records: 2210, payloadBytes: 262960, createdAt: '2026-09-18T16:47:00Z', status: 'awaiting_upload', receiptCode: null },
-    { id: 'don_d4f6b8c0e2a35791f0b2d4e6', participantId: 'P-0421', platform: 'tiktok', roundKey: 'wave-1', records: 1421, payloadBytes: 158660, createdAt: '2026-04-11T20:20:00Z', status: 'deleted', receiptCode: 'DD-6ZKR-8CTP' },
+    { id: 'don_9c1e4b7a2d3f6081a5c7e9b2', participantId: 'P-0418', platform: 'tiktok', roundKey: 'data-donation-round-2', records: 2114, payloadBytes: 236804, createdAt: '2026-09-03T18:22:00Z', status: 'accepted', receiptCode: 'DD-K7M2-Q9RX' },
+    { id: 'don_1f4a8c2e6b9d0357a2c4e6f8', participantId: 'P-0418', platform: 'youtube', roundKey: 'data-donation-round-2', records: 3402, payloadBytes: 401117, createdAt: '2026-09-03T18:41:00Z', status: 'accepted', receiptCode: 'DD-3HQV-8NTB' },
+    { id: 'don_7b3d5f9a1c2e4680b1d3f5a7', participantId: 'P-0419', platform: 'tiktok', roundKey: 'data-donation-round-2', records: 987, payloadBytes: 110236, createdAt: '2026-09-04T02:15:00Z', status: 'accepted', receiptCode: 'DD-XW4P-2MJ7' },
+    { id: 'don_2e6c8a0f4b1d3579c2e4a6b8', participantId: 'P-0422', platform: 'facebook', roundKey: 'data-donation-round-2', records: 192, payloadBytes: 30150, createdAt: '2026-10-07T18:20:00Z', status: 'accepted', receiptCode: 'DD-9BRD-5KCN' },
+    { id: 'don_5a9e1c3b7d2f4680e1c3a5b7', participantId: 'P-0422', platform: 'tiktok', roundKey: 'data-donation-round-2', records: 1533, payloadBytes: 171894, createdAt: '2026-09-05T15:27:00Z', status: 'accepted', receiptCode: 'DD-M6TZ-7QGE' },
+    { id: 'don_8d2f4a6c0e3b5791d2f4a6c8', participantId: 'P-0423', platform: 'youtube', roundKey: 'data-donation-round-2', records: 5218, payloadBytes: 614352, createdAt: '2026-09-06T21:48:00Z', status: 'accepted', receiptCode: 'DD-R2NF-4HWX' },
+    { id: 'don_3c7a9e1b5d0f2468a3c5e7f9', participantId: 'P-0423', platform: 'tiktok', roundKey: 'data-donation-round-2', records: 402, payloadBytes: 45109, createdAt: '2026-09-06T22:03:00Z', status: 'accepted', receiptCode: 'DD-7VJK-3PMQ' },
+    { id: 'don_6b0d2f4a8c1e3579b4d6f8a0', participantId: 'P-0424', platform: 'tiktok', roundKey: 'data-donation-round-2', records: 1760, payloadBytes: 197336, createdAt: '2026-09-08T17:36:00Z', status: 'accepted', receiptCode: 'DD-2QSE-9YRB' },
+    { id: 'don_4e8b0c2d6a9f1357e5a7c9d1', participantId: 'P-0424', platform: 'youtube', roundKey: 'data-donation-round-2', records: 0, payloadBytes: 0, createdAt: '2026-09-08T17:58:00Z', status: 'failed', receiptCode: null, failureReason: 'checksum_or_length_mismatch' },
+    { id: 'don_0f4c6e8a2b5d7913f6b8d0e2', participantId: 'P-0427', platform: 'youtube', roundKey: 'data-donation-round-2', records: 2921, payloadBytes: 343188, createdAt: '2026-09-11T19:12:00Z', status: 'accepted', receiptCode: 'DD-H5WT-6DKA' },
+    { id: 'don_a1c3e5b7d9f02468c7e9b1d3', participantId: 'P-0427', platform: 'tiktok', roundKey: 'data-donation-round-2', records: 1188, payloadBytes: 132511, createdAt: '2026-09-11T19:33:00Z', status: 'accepted', receiptCode: 'DD-NQ8X-2FMV' },
+    { id: 'don_b2d4f6a8c0e13579d8f0b2c4', participantId: 'P-0428', platform: 'tiktok', roundKey: 'data-donation-round-2', records: 640, payloadBytes: 71802, createdAt: '2026-09-15T00:06:00Z', status: 'uploaded', receiptCode: null },
+    { id: 'don_c3e5a7b9d1f24680e9a1c3d5', participantId: 'P-0419', platform: 'youtube', roundKey: 'data-donation-round-2', records: 2210, payloadBytes: 262960, createdAt: '2026-09-18T16:47:00Z', status: 'awaiting_upload', receiptCode: null },
+    { id: 'don_d4f6b8c0e2a35791f0b2d4e6', participantId: 'P-0421', platform: 'tiktok', roundKey: 'initial-collection', records: 1421, payloadBytes: 158660, createdAt: '2026-04-11T20:20:00Z', status: 'deleted', receiptCode: 'DD-6ZKR-8CTP' },
+    { id: 'don_demo_instagram_001', participantId: 'P-0418', platform: 'instagram', roundKey: 'data-donation-round-2', records: 480, payloadBytes: 70800, createdAt: '2026-10-07T18:30:00Z', status: 'accepted', receiptCode: 'DD-DM7Q-7JG2' },
+    { id: 'don_demo_initial_tiktok', participantId: 'P-0417', platform: 'tiktok', roundKey: 'initial-collection', records: 812, payloadBytes: 92480, createdAt: '2026-04-10T18:00:00Z', status: 'accepted', receiptCode: 'DD-4DMQ-K7TJ' },
+    { id: 'don_demo_initial_youtube', participantId: 'P-0417', platform: 'youtube', roundKey: 'initial-collection', records: 1365, payloadBytes: 183960, createdAt: '2026-04-10T18:20:00Z', status: 'accepted', receiptCode: 'DD-8DMQ-P4YT' },
   ];
 
   const WITHDRAWALS = [
@@ -653,7 +723,7 @@ window.DEMO_DATA = (function () {
       deadlineAt: '2026-10-20T23:59:00-07:00',
       status: 'received',
       reason: 'Not provided',
-      deletionJob: { id: 'job_del_7f2c', status: 'pending_approval', proposedBy: 'd.reyes', proposedAt: '2026-09-09T17:30:00Z', approvedBy: null, scope: 'wave-1 · 1 accepted donation' },
+      deletionJob: { id: 'job_del_7f2c', status: 'pending_approval', proposedBy: 'demo.manager', proposedAt: '2026-09-09T17:30:00Z', approvedBy: null, scope: 'initial-collection · 1 synthetic donation' },
     },
     {
       id: 'wdr_8b0d2f4a6c1e3579b3d5f7a9',
@@ -662,30 +732,31 @@ window.DEMO_DATA = (function () {
       deadlineAt: '2026-07-06T23:59:00-07:00',
       status: 'completed',
       reason: 'Not provided',
-      deletionJob: { id: 'job_del_2b9e', status: 'completed', proposedBy: 'd.reyes', proposedAt: '2026-05-26T16:02:00Z', approvedBy: 'p.jamie', approvedAt: '2026-05-27T15:10:00Z', completedAt: '2026-05-27T15:14:00Z', scope: 'wave-1 · 2 accepted donations' },
+      deletionJob: { id: 'job_del_2b9e', status: 'completed', proposedBy: 'demo.manager', proposedAt: '2026-05-26T16:02:00Z', approvedBy: 'demo.owner', approvedAt: '2026-05-27T15:10:00Z', completedAt: '2026-05-27T15:14:00Z', scope: 'initial-collection · 2 synthetic donations' },
     },
   ];
 
   const AUDIT_EVENTS = [
+    { at: '2026-10-07T18:00:00Z', action: 'release.published', actor: 'admin demo.owner', subject: 'rel_v3', summary: 'Simulated release v3: optional Instagram/Facebook added within Round 2; TikTok/YouTube requirements and earlier donations preserved.' },
     { at: '2026-09-19T09:00:00Z', action: 'backup.completed', actor: 'system', subject: 'backup_runs/bkp_0919', summary: 'Nightly PostgreSQL backup verified (SSE-KMS).' },
     { at: '2026-09-18T16:47:00Z', action: 'donation.created', actor: 'participant P-0419', subject: 'don_c3e5…c3d5', summary: 'YouTube donation attempt created; staging authorization issued (15 min).' },
     { at: '2026-09-15T00:06:00Z', action: 'donation.uploaded', actor: 'participant P-0428', subject: 'don_b2d4…b2c4', summary: 'Exact bytes staged; awaiting completion verification.' },
-    { at: '2026-09-11T19:33:00Z', action: 'donation.accepted', actor: 'participant P-0427', subject: 'don_a1c3…b1d3', summary: 'TikTok payload verified and promoted to the immutable project key. Round wave-2 complete; flat completion eligibility recorded.' },
-    { at: '2026-09-10T22:05:00Z', action: 'project.draft.updated', actor: 'admin d.reyes', subject: 'prj_b7c209', summary: 'Draft project “Conversational AI in Everyday Life” consent workflow edited.' },
-    { at: '2026-09-09T17:30:00Z', action: 'deletion_job.proposed', actor: 'admin d.reyes', subject: 'job_del_7f2c', summary: 'Withdrawal deletion proposed for P-0421 (wave-1, 1 donation). Awaiting a different owner.' },
+    { at: '2026-09-11T19:33:00Z', action: 'donation.accepted', actor: 'participant P-0427', subject: 'don_a1c3…b1d3', summary: 'Synthetic TikTok payload accepted in the simulation. Round 2 complete; no payment.' },
+    { at: '2026-09-10T22:05:00Z', action: 'project.draft.updated', actor: 'admin demo.manager', subject: 'prj_b7c209', summary: 'Synthetic draft project consent workflow edited.' },
+    { at: '2026-09-09T17:30:00Z', action: 'deletion_job.proposed', actor: 'admin demo.manager', subject: 'job_del_7f2c', summary: 'Simulated deletion proposed for P-0421 (initial-collection, 1 donation). Awaiting a different owner.' },
     { at: '2026-09-08T17:58:00Z', action: 'donation.verification_failed', actor: 'system', subject: 'don_4e8b…c9d1', summary: 'Checksum/length mismatch; staging object deleted, attempt marked failed.' },
     { at: '2026-09-08T14:12:00Z', action: 'withdrawal.requested', actor: 'participant P-0421', subject: 'wdr_3a5c…e5b7', summary: 'Sessions and links revoked, queued email cancelled, deadline computed (30 business days).' },
-    { at: '2026-09-02T18:00:00Z', action: 'participant.provisioned', actor: 'admin d.reyes', subject: 'P-0417', summary: 'Pseudonymous participant created in wave-2; invitation link displayed once.' },
-    { at: '2026-09-01T15:00:00Z', action: 'round.opened', actor: 'system', subject: 'rnd_w2', summary: 'Collection round wave-2 opened under release v2.' },
-    { at: '2026-05-18T16:20:00Z', action: 'release.published', actor: 'admin p.jamie', subject: 'rel_v2', summary: 'Release v2 published after step-up; material change flagged re-consent.' },
-    { at: '2026-03-02T17:04:00Z', action: 'release.published', actor: 'admin p.jamie', subject: 'rel_v1', summary: 'Initial release v1 published.' },
+    { at: '2026-09-02T18:00:00Z', action: 'participant.provisioned', actor: 'admin demo.manager', subject: 'P-0417', summary: 'Synthetic participant added to Round 2; no real invitation sent.' },
+    { at: '2026-09-01T15:00:00Z', action: 'round.opened', actor: 'system', subject: 'rnd_w2', summary: 'Synthetic Round 2 opened under release v2.' },
+    { at: '2026-05-18T16:20:00Z', action: 'release.published', actor: 'admin demo.owner', subject: 'rel_v2', summary: 'Synthetic release v2 published in the simulation.' },
+    { at: '2026-03-02T17:04:00Z', action: 'release.published', actor: 'admin demo.owner', subject: 'rel_v1', summary: 'Synthetic initial release v1 published.' },
   ];
 
   const ADMINS = [
-    { username: 'p.jamie', displayName: 'Pooriya Jamie', role: 'owner', status: 'active', lastSeen: '2026-09-19T15:40:00Z' },
-    { username: 'd.reyes', displayName: 'Daniel Reyes', role: 'manager', status: 'active', lastSeen: '2026-09-19T14:05:00Z' },
-    { username: 'l.chen', displayName: 'Lin Chen', role: 'viewer', status: 'active', lastSeen: '2026-09-17T21:12:00Z' },
-    { username: 'a.brooks', displayName: 'Avery Brooks', role: 'owner', status: 'active', lastSeen: '2026-09-18T18:30:00Z' },
+    { username: 'demo.owner', displayName: 'Demo Owner', role: 'owner', status: 'active', lastSeen: '2026-10-07T18:40:00Z' },
+    { username: 'demo.manager', displayName: 'Demo Manager', role: 'manager', status: 'active', lastSeen: '2026-10-07T18:05:00Z' },
+    { username: 'demo.viewer', displayName: 'Demo Viewer', role: 'viewer', status: 'active', lastSeen: '2026-10-07T17:12:00Z' },
+    { username: 'demo.second-owner', displayName: 'Second Demo Owner', role: 'owner', status: 'active', lastSeen: '2026-10-07T17:30:00Z' },
   ];
 
   const SYSTEM = {
@@ -693,64 +764,44 @@ window.DEMO_DATA = (function () {
     database: { status: 'healthy', latencyMs: 4, detail: 'PostgreSQL 16 · TLS required' },
     storage: { status: 'healthy', provider: 'S3 · SSE-KMS', activePayloads: 11, activePayloadBytes: 2318113, stagingObjects: 2 },
     worker: { status: 'healthy', lastHeartbeat: '2026-09-19T15:58:00Z', queued: 1, running: 0 },
-    appVersion: '2026.09.1+demo',
-    deploymentProfile: 'participant',
+    appVersion: '2026.10.3+offline-demo',
+    deploymentProfile: 'offline_demo',
     backup: { status: 'completed', completedAt: '2026-09-19T09:00:00Z' },
   };
 
   const FEEDBACK = { averageRating: 4.4, ratings: 9, unreviewed: 2 };
 
   /* ------------------------------------------------------------------ */
-  /* Consent (fictional research consent, version 2.0)                   */
+  /* Demonstration acknowledgment — not a real study consent document   */
   /* ------------------------------------------------------------------ */
 
   const CONSENT = {
-    version: '2.0',
+    version: '3.0-demo',
+    requireScroll: true,
+    requireSignature: true,
     summary: {
       purpose:
-        'Researchers at OASIS Lab are studying how the videos, posts and searches people encounter on everyday apps relate to wellbeing over time.',
+        'Try a local-only demonstration of the Social Media Data Donation workflow. The study name and approved data scope mirror the application, but this tour does not enroll you in research. All activity and participant examples are fictional.',
       whatYouShare:
-        "Only the activity groups approved for this project: when you watched or liked videos, when you searched, public links to that content, and (only if you turn it on) the words you searched for. For ChatGPT: when conversations happened, the messages you wrote and ChatGPT's replies. Video titles, direct messages, profiles and account details are never collected.",
+        'TikTok watched-video dates and links; YouTube watched-video dates, links, titles and channel names, plus viewed-post dates, links and titles. Optional Instagram includes watched-video dates and links. Optional Facebook includes feed-shown post/video dates and links, and main-search dates and exact query words. Only available values are included.',
       risks:
-        'The main risk is that public links, search words or ChatGPT messages could reveal interests or private matters. You review every outgoing record first, and data is stored pseudonymously under encryption.',
+        'In real exports, links and search words can reveal sensitive interests. Facebook links may identify group or private content; “shown in feed” does not prove it was read or watched. Here, every example is synthetic and no payload is sent to a server.',
       voluntary:
-        'Participation is voluntary. You may stop at any point without penalty. Compensation of USD 20.00 is offered after completing the required donations for a collection round.',
+        'This is an unpaid demo. TikTok and YouTube are the required sources in the simulated Round 2; Instagram and Facebook are optional. You can leave the tour at any time. Use a made-up name for the demonstration acknowledgment.',
       withdrawal:
-        'You can request withdrawal and deletion while your data remain identifiable to the study, in the app or by contacting the coordinator. Deletion is completed within 30 business days.',
+        'Withdrawal and deletion screens only illustrate the workflow. They do not submit requests or delete real study records. Restarting the tour clears its temporary page state; displayed timelines are synthetic examples, not a service promise.',
     },
     paragraphs: [
-      'You are being asked to take part in a research study conducted by OASIS Lab. Please read this document carefully. It explains what the study involves and what happens to the information you choose to donate.',
-      'The study asks you to request a copy of your own activity from one or more apps or online services, open that file in the DataDonate application on your own device, and donate only the activity groups you choose. Your original file never leaves your device.',
-      "This project may collect: the dates and times of videos you watched or liked, the dates of searches you made, canonical public links to that content, and, only when you switch it on, the words you searched for. For ChatGPT it may collect when each conversation happened, how many messages it has, the messages you wrote and ChatGPT's replies; you can leave out any conversation or message. The application removes every other part of your export before you can even see it.",
-      'The study never collects profile or account details, contact information, direct messages, comments, followers, login or device history, purchases, advertising records, conversation titles, or the titles of videos you watched.',
-      'Donated records are stored under a pseudonymous participant identifier in encrypted research storage. The research team can decrypt research payloads; this is not end-to-end encryption. Your optional contact email is encrypted separately and is never part of research data.',
-      'You may withdraw at any time during the identifiable data-collection period. Withdrawal immediately ends your access and starts a deletion request that is completed within 30 business days. Compensation already earned is not affected.',
-      'De-identified research data are retained for 365 days after the collection round closes and are then deleted according to the approved data-management plan.',
-      'If you have questions about this study, contact the research coordinator at coordinator@oasislab.example. By continuing you confirm you have read this document, that your questions were answered, and that you agree to take part.',
+      'This is a fictional acknowledgment for an offline visual tour, not a legal consent form or research enrollment. Do not enter your real name, contact information, participant link, or export files. Use only the synthetic examples supplied by the demo.',
+      'The simulated project is Social Media Data Donation, release v3, Round 2. TikTok and YouTube are required for completion of that round. Instagram and Facebook are optional. Earlier TikTok and YouTube donations remain visible as history and do not complete the current round.',
+      'TikTok includes watched-video dates and links. YouTube includes watched-video dates, links, titles and channel names, plus viewed-post dates, links and titles. TikTok likes and searches, YouTube searches, and ChatGPT conversations are not part of this study.',
+      'Optional Instagram includes dates and post or Reel links from its watched-video history. Optional Facebook includes dates and links for posts and videos recorded as shown in the feed, plus dates and exact query words from main Facebook searches. Marketplace searches, author descriptions, private account identifiers, messages, and unrelated export sections are not included.',
+      'Shown in a Facebook feed is not a measurement of reading or watching. Links can identify group or private posts and search queries can contain sensitive words. Review the exact records before confirming. A link is not a promise that content is publicly accessible.',
+      'All available dates and all approved available fields are included. Missing values remain absent; the application does not infer them. You may remove or restore individual records. Date, category, field, and bulk-removal controls are not offered for this study. The date range shown in a preview describes the supplied sample, not completeness of platform history.',
+      'The real application processes an original export locally and prepares a minimized payload for donation. This offline tour does not open real exports, contact platforms, upload payloads, or retain activity after a page reset. The bytes, hashes, receipts, storage panels, and deletion timelines shown here are simulated or calculated from synthetic data.',
+      'The demonstrated study is unpaid. Scrolling to the end and typing a made-up name only unlock the local tour. There are no comprehension questions. Continuing does not create an account, consent record, payment entitlement, or request in the real study.',
     ],
-    questions: [
-      {
-        id: 'q1',
-        prompt: 'Which of these will the study never collect?',
-        options: [
-          { id: 'a', label: 'Dates of the videos you watched' },
-          { id: 'b', label: 'Public links to videos' },
-          { id: 'c', label: 'Your direct messages and account details' },
-          { id: 'd', label: 'Dates of your searches' },
-        ],
-        correct: 'c',
-      },
-      {
-        id: 'q2',
-        prompt: 'When can you ask to withdraw?',
-        options: [
-          { id: 'a', label: 'Only before you upload anything' },
-          { id: 'b', label: 'At any time during the identifiable data-collection period' },
-          { id: 'c', label: 'Never after you agree to consent' },
-        ],
-        correct: 'b',
-      },
-    ],
+    questions: [],
   };
 
   /* ------------------------------------------------------------------ */
@@ -860,6 +911,7 @@ window.DEMO_DATA = (function () {
     for (let i = 0; i < 96; i += 1) {
       records.push({ localId: 'searches#' + seq++, category: 'searches', timestamp: isoNoMs(randomTime(rng)), fields: { searchTerm: pick(rng, SEARCH_VOCAB) } });
     }
+    records[0].timestamp = '2018-08-02T12:00:00Z';
     return records;
   }
 
@@ -884,6 +936,54 @@ window.DEMO_DATA = (function () {
     }
     for (let i = 0; i < 210; i += 1) {
       records.push({ localId: 'searches#' + seq++, category: 'searches', timestamp: isoNoMs(randomTime(rng)), fields: { searchTerm: pick(rng, SEARCH_VOCAB) } });
+    }
+    records[0].timestamp = '2012-06-15T12:00:00Z';
+    // A supplied history entry can lack metadata. Do not invent it.
+    delete records[1].fields.title;
+    delete records[1].fields.channelName;
+    delete records[2].fields.contentRef;
+    return records;
+  }
+
+  function generateInstagram(rng) {
+    const records = [];
+    for (let i = 0; i < 480; i += 1) {
+      const fields = i === 479 ? {} : {
+        contentRef: 'https://www.instagram.com/' + (i % 3 === 0 ? 'p/' : 'reel/') + 'SYNTHETIC_' + String(i + 1).padStart(4, '0') + '/',
+      };
+      records.push({ localId: 'videos_watched#' + i, category: 'videos_watched', timestamp: isoNoMs(randomTime(rng)), fields });
+    }
+    records[0].timestamp = '2014-06-15T12:00:00Z';
+    return records;
+  }
+
+  function generateFacebook(rng) {
+    const records = [];
+    for (let i = 0; i < 72; i += 1) {
+      const id = String(900000000000000 + i);
+      const contentRef = i % 3 === 0
+        ? 'https://www.facebook.com/groups/synthetic-demo-group/posts/' + id
+        : i % 3 === 1
+          ? 'https://www.facebook.com/permalink.php?story_fbid=' + id + '&id=900000000099999'
+          : 'https://www.facebook.com/synthetic.demo/posts/pfbidSynthetic' + String(i + 1).padStart(4, '0');
+      records.push({ localId: 'posts_shown#' + i, category: 'posts_shown', timestamp: isoNoMs(randomTime(rng)), fields: { contentRef } });
+    }
+    for (let i = 0; i < 24; i += 1) {
+      records.push({ localId: 'videos_shown#' + i, category: 'videos_shown', timestamp: isoNoMs(randomTime(rng)), fields: {
+        contentRef: 'https://www.facebook.com/reel/' + String(900000000010000 + i),
+      } });
+    }
+    for (let i = 0; i < 96; i += 1) {
+      records.push({ localId: 'searches#' + i, category: 'searches', timestamp: isoNoMs(randomTime(rng)), fields: {
+        searchTerm: i === 0 ? 'synthetic community garden' : i === 1 ? 'ceramics café classes' : pick(rng, SEARCH_VOCAB),
+      } });
+    }
+    records[0].timestamp = '2012-06-15T12:00:00Z';
+    delete records[71].fields.contentRef;
+    // Two deliberate synthetic duplicates make the demo's cleanup count testable.
+    for (let i = 0; i < 2; i += 1) {
+      const original = records[96 + i];
+      records.push(Object.assign({}, original, { localId: 'synthetic-duplicate#' + i, fields: Object.assign({}, original.fields) }));
     }
     return records;
   }
@@ -925,11 +1025,29 @@ window.DEMO_DATA = (function () {
     if (cache.has(sourceId)) return cache.get(sourceId);
     const rng = E.mulberry32(E.fnv1a('datadonate-demo:' + sourceId));
     const capability = CAPABILITIES[sourceId];
+    if (!capability) throw new Error('No synthetic example exists for this source.');
     let records;
     if (sourceId === 'tiktok') records = generateTikTok(rng);
     else if (sourceId === 'youtube') records = generateYouTube(rng);
+    else if (sourceId === 'instagram') records = generateInstagram(rng);
+    else if (sourceId === 'facebook') records = generateFacebook(rng);
     else if (sourceId === 'chatgpt') records = generateChatGpt(rng);
     else records = [];
+    const warnings = [];
+    if (sourceId === 'facebook') {
+      const seen = new Set();
+      let duplicateCount = 0;
+      records = records.filter((record) => {
+        const identity = E.canonicalJson([record.category, record.timestamp, record.fields]);
+        if (seen.has(identity)) { duplicateCount += 1; return false; }
+        seen.add(identity);
+        return true;
+      });
+      if (duplicateCount) warnings.push({
+        code: 'duplicate_activity_entry', categoryId: 'searches', count: duplicateCount,
+        message: 'Exact duplicate entries were removed from the synthetic search sample.',
+      });
+    }
     const extraction = {
       ok: true,
       records,
@@ -941,7 +1059,7 @@ window.DEMO_DATA = (function () {
         capability.categories,
         capability.systemExcluded,
         capability.unsupported,
-        [],
+        warnings,
       ),
     };
     cache.set(sourceId, extraction);
