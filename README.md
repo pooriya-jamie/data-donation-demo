@@ -62,6 +62,12 @@ Refreshing or choosing **Reset demo** clears the simulated session.
 
 The page is written for readers who are not engineers. Technical details (file paths, hashes, request names) sit behind "For technical readers" toggles.
 
+The default tour is intentionally brief: a short introduction, visible actions,
+and expandable detail. Download guides, study explanations, server logs and
+administrative reference material stay collapsed until requested. Consent text,
+the included-data summary, privacy cautions, and explicit donation confirmation
+remain available; **Change file** and **Back to sources** stay visible.
+
 The views share one in-memory state: a donation made in view 2 appears in
 views 3 and 4; suspending an adapter in view 4 changes view 2; publishing a
 material release in view 4 forces re-consent in view 2. "Reset demo" in the
@@ -86,12 +92,16 @@ No build is needed to view the demo. Developers can run:
 ```powershell
 node --test tests/data-engine.test.cjs
 node tests/browser-smoke.mjs
+node tests/reading-load.mjs
 ```
 
 The browser checks reuse Playwright from the neighboring `project/node_modules`
 installation and an installed Chrome browser. They run isolated, headless
 contexts against local files, block external requests, and write screenshots
 under `tests/output/`. They never operate the live study.
+The reading-load check measures text visible by default against the previous
+published demo (`2577c53`), excluding closed disclosures. It also saves screenshots
+for visual review; it does not judge reading difficulty or measure completion time.
 
 ## Licence
 

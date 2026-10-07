@@ -55,6 +55,10 @@
     return '<section class="admin-panel ' + (extraCls || '') + '"><div class="admin-panel-heading"><div><h2>' + (iconName ? icon(iconName) : '') + esc(title) + '</h2>' + (subtitle ? '<p>' + esc(subtitle) + '</p>' : '') + '</div></div>' + bodyHtml + '</section>';
   }
 
+  function details(label, bodyHtml) {
+    return '<details class="demo-details"><summary>' + esc(label) + '</summary><div class="demo-details-body">' + bodyHtml + '</div></details>';
+  }
+
   function stepUpFresh() {
     return Date.now() < A.stepUpUntil;
   }
@@ -63,7 +67,7 @@
     if (stepUpFresh()) return true;
     const result = await App.dialog({
       title: 'Confirm it is you',
-      body: '<p>This offline demo simulates recent step-up authentication. Enter any fictional value; do not enter a real password. Nothing is authenticated against a server.</p>',
+      body: '<p>Demo only. Enter a fictional password, never a real one.</p>',
       fields: [{ name: 'password', label: 'Demo password for ' + A.user.username, type: 'password', required: true, hint: 'Any fictional value is accepted.' }],
       confirmLabel: 'Verify',
     });
@@ -167,7 +171,7 @@
         '<div class="btn-row" style="margin-top:1rem"><button type="button" class="btn btn-primary btn-sm" data-action="' + (isMain ? 'a-nav' : 'a-not-in-tour') + '" data-screen="overview">Open workspace</button><select class="select-input input-sm" style="width:auto" aria-label="Lifecycle" data-change="a-lifecycle"><option>' + esc(p.lifecycle) + '</option><option>paused</option><option>closed</option></select></div></article>'
       );
     }).join('');
-    return pageHeader('Umbrella', 'Projects', 'Create and manage independent data-donation projects from one secure administration workspace.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-not-in-tour">New project</button>') + '<div class="admin-project-grid">' + cards + '</div>';
+    return pageHeader('Umbrella', 'Projects', null, '<button type="button" class="btn btn-primary btn-sm" data-action="a-not-in-tour">New project</button>') + '<div class="admin-project-grid">' + cards + '</div>';
   }
 
   function screenOverview() {
@@ -183,21 +187,21 @@
     const reconsent = reconsentPending();
     const metrics =
       '<div class="admin-metric-grid">' +
-      '<div class="admin-metric"><span>Participants</span><strong>' + active + '</strong><small>' + active + ' active · ' + invited + ' invited</small></div>' +
-      '<div class="admin-metric admin-metric-positive"><span>Accepted donations</span><strong>' + accepted + '</strong><small>' + esc(S.round.name) + ' · ' + attempts + ' attempts · ' + A.donations.length + ' across all rounds</small></div>' +
+      '<div class="admin-metric"><span>Active participants</span><strong>' + active + '</strong><small>' + invited + ' invited</small></div>' +
+      '<div class="admin-metric admin-metric-positive"><span>Accepted donations</span><strong>' + accepted + '</strong><small>' + esc(S.round.name) + ' · ' + attempts + ' attempts</small></div>' +
       '<div class="admin-metric"><span>Feedback</span><strong>' + D.FEEDBACK.averageRating.toFixed(1) + '</strong><small>average rating · ' + D.FEEDBACK.ratings + ' ratings</small></div>' +
       '<div class="admin-metric ' + (pendingWithdrawals ? 'admin-metric-warning' : '') + '"><span>Pending withdrawals</span><strong>' + pendingWithdrawals + '</strong><small>' + jobsAwaiting + ' job' + (jobsAwaiting === 1 ? '' : 's') + ' awaiting action</small></div>' +
       '</div>';
     const attention =
       '<ul class="admin-action-list">' +
-      (suspended.length ? '<li class="is-alert"><button type="button" data-action="a-nav" data-screen="system"><span><strong>' + suspended.length + ' source adapter' + (suspended.length > 1 ? 's' : '') + ' suspended: ' + esc(suspended.map(App.sourceName).join(', ')) + '</strong><span>Participants cannot upload for this source until an owner restores it.</span></span>' + icon('arrow-right', 'ico-sm') + '</button></li>' : '') +
-      (reconsent.length ? '<li><button type="button" data-action="a-nav" data-screen="participants"><span><strong>' + reconsent.length + ' participant' + (reconsent.length > 1 ? 's' : '') + ' must re-consent</strong><span>Release v' + rel.version + ' changed material terms; their next session starts with consent.</span></span>' + icon('arrow-right', 'ico-sm') + '</button></li>' : '') +
-      '<li><button type="button" data-action="a-nav" data-screen="withdrawals"><span><strong>' + pendingWithdrawals + ' withdrawal request' + (pendingWithdrawals === 1 ? '' : 's') + '</strong><span>Review deadlines and begin deletion jobs.</span></span>' + icon('arrow-right', 'ico-sm') + '</button></li>' +
-      '<li><button type="button" data-action="a-nav" data-screen="feedback"><span><strong>' + D.FEEDBACK.unreviewed + ' unreviewed feedback entries</strong><span>Read usability comments and mark follow-up.</span></span>' + icon('arrow-right', 'ico-sm') + '</button></li>' +
-      '<li><button type="button" data-action="a-nav" data-screen="participants"><span><strong>Manage participant access</strong><span>Provision access links and review delivery status.</span></span>' + icon('arrow-right', 'ico-sm') + '</button></li>' +
+      (suspended.length ? '<li class="is-alert"><button type="button" data-action="a-nav" data-screen="system"><span><strong>Uploads paused: ' + esc(suspended.map(App.sourceName).join(', ')) + '</strong><span>An owner must restore access.</span></span>' + icon('arrow-right', 'ico-sm') + '</button></li>' : '') +
+      (reconsent.length ? '<li><button type="button" data-action="a-nav" data-screen="participants"><span><strong>' + reconsent.length + ' participant' + (reconsent.length > 1 ? 's' : '') + ' must re-consent</strong></span>' + icon('arrow-right', 'ico-sm') + '</button></li>' : '') +
+      '<li><button type="button" data-action="a-nav" data-screen="withdrawals"><span><strong>' + pendingWithdrawals + ' withdrawal request' + (pendingWithdrawals === 1 ? '' : 's') + '</strong></span>' + icon('arrow-right', 'ico-sm') + '</button></li>' +
+      '<li><button type="button" data-action="a-nav" data-screen="feedback"><span><strong>' + D.FEEDBACK.unreviewed + ' unreviewed feedback entries</strong></span>' + icon('arrow-right', 'ico-sm') + '</button></li>' +
+      '<li><button type="button" data-action="a-nav" data-screen="participants"><span><strong>Manage participant access</strong></span>' + icon('arrow-right', 'ico-sm') + '</button></li>' +
       '</ul>';
     const system =
-      '<dl class="admin-definition-list"><dt>Health</dt><dd>' + badge(D.SYSTEM.status) + '</dd><dt>Deployment</dt><dd>' + esc(D.SYSTEM.deploymentProfile) + ' profile · S3 SSE-KMS</dd><dt>Application version</dt><dd><code>' + esc(D.SYSTEM.appVersion.slice(0, 12)) + '</code></dd><dt>Active release</dt><dd>v' + rel.version + ' · published ' + esc(E.formatDate(rel.publishedAt)) + '</dd><dt>Policy hash</dt><dd><code>' + esc(E.shortHash(App.hashesFor(rel.id).materialHash, 10, 6)) + '</code></dd></dl>' +
+      '<dl class="admin-definition-list"><dt>Health</dt><dd>' + badge(D.SYSTEM.status) + '</dd><dt>Active release</dt><dd>v' + rel.version + ' · ' + esc(E.formatDate(rel.publishedAt)) + '</dd></dl>' +
       '<p style="margin:0.75rem 0 0"><button type="button" class="link-btn" data-action="a-nav" data-screen="system">Open system details</button></p>';
     const byPlatform = App.donationSources().map((s) => {
       const n = acceptedDonations(S.round.roundKey).filter((d) => d.platform === s.id).length;
@@ -206,13 +210,13 @@
     const max = Math.max(1, ...byPlatform.map((b) => b.n));
     const bars = '<div class="admin-platform-bars">' + byPlatform.map((b) => '<div><span>' + esc(b.label) + '</span><progress value="' + b.n + '" max="' + max + '" aria-label="' + esc(b.label) + ' accepted donations"></progress><b>' + b.n + '</b></div>').join('') + '</div>';
     return (
-      pageHeader(pr.name, 'Overview', 'Monitor participation, review incoming feedback, and respond to time-sensitive requests.') +
+      pageHeader(pr.name, 'Overview', null) +
       metrics +
       '<div class="admin-dashboard-grid">' +
-      '<section class="admin-panel"><div class="admin-panel-heading"><div><span class="admin-eyebrow">Action center</span><h2>' + icon('warning-circle') + 'Needs attention</h2></div></div>' + attention + '</section>' +
-      '<section class="admin-panel"><div class="admin-panel-heading"><div><span class="admin-eyebrow">Environment</span><h2>' + icon('check-circle') + 'System status</h2></div></div>' + system + '</section>' +
+      '<section class="admin-panel"><div class="admin-panel-heading"><h2>' + icon('warning-circle') + 'Needs attention</h2></div>' + attention + '</section>' +
+      '<section class="admin-panel"><div class="admin-panel-heading"><h2>' + icon('check-circle') + 'System status</h2></div>' + system + '</section>' +
       '</div>' +
-      '<section class="admin-panel"><div class="admin-panel-heading"><div><span class="admin-eyebrow">Activity</span><h2>' + icon('database') + 'Donations by platform</h2></div><p>Accepted donations in ' + esc(S.round.name) + '. Metadata only.</p></div>' + bars + '</section>'
+      '<section class="admin-panel"><div class="admin-panel-heading"><h2>' + icon('database') + 'Donations by platform</h2><p>' + esc(S.round.name) + ' · accepted only</p></div>' + bars + '</section>'
     );
   }
 
@@ -232,9 +236,8 @@
         '<div class="admin-mobile-list">' + rows.map((d) => '<div class="admin-mobile-card"><strong class="admin-mono">' + esc(d.id.slice(0, 16)) + '…</strong> ' + badge(d.status) + '<dl class="kv"><dt>Participant</dt><dd>' + esc(d.participantId) + '</dd><dt>Round</dt><dd>' + esc(roundName(d.roundKey)) + '</dd><dt>Platform</dt><dd>' + esc(App.sourceName(d.platform)) + '</dd><dt>Records</dt><dd>' + (d.records ? E.formatNumber(d.records) : '—') + '</dd><dt>Created</dt><dd>' + esc(E.formatDate(d.createdAt)) + '</dd></dl></div>').join('') + '</div>'
       : '<div class="admin-empty"><span class="admin-empty-icon">' + icon('database') + '</span><br /><strong>No donation attempts found</strong><br />No donations match the selected filters.</div>';
     return (
-      pageHeader(project().name, 'Donations', 'Review donation metadata and integrity status. Payload contents remain protected behind a separate audited download workflow.', '<button type="button" class="btn btn-secondary btn-sm" data-action="a-nav" data-screen="downloads">' + icon('download', 'ico-sm') + ' Secure downloads</button>') +
-      '<div class="admin-privacy-callout">' + icon('shield-check') + '<div><strong>Metadata-only view</strong><p>This page never renders participant payload content. Downloads require a reason, step-up verification, and an audit event.</p></div></div>' +
-      panel('Donation attempts', rows.length + ' fictional attempts shown · ' + (roundFilter === 'all' ? 'all rounds, including history' : roundName(roundFilter)) + '. Filter by round, status or source. Green rows were simulated in this session.', filters + table)
+      pageHeader(project().name, 'Donations', 'Metadata only. Participant payloads are not shown.', '<button type="button" class="btn btn-secondary btn-sm" data-action="a-nav" data-screen="downloads">' + icon('download', 'ico-sm') + ' Secure downloads</button>') +
+      panel('Donation attempts', rows.length + ' shown · ' + (roundFilter === 'all' ? 'all rounds' : roundName(roundFilter)), filters + table + details('Download safeguards', '<p>Downloads require a reason, step-up verification and an audit event. Green rows were simulated in this session.</p>'))
     );
   }
 
@@ -245,20 +248,20 @@
     const material = changes.some((c) => c.material);
     const warnings = [];
     const roundRequired = S.round.requiredSourceIds.filter((id) => !rel.sourcePolicies.find((p) => p.sourceId === id && p.required));
-    if (roundRequired.length) warnings.push({ title: S.round.name + ' specifies required sources', detail: roundRequired.map(App.sourceName).join(' + ') + ' are required by this round. Effective completion requirement: ' + App.requiredSourceIds().map(App.sourceName).join(' + ') + '. Instagram and Facebook remain optional. Participation is unpaid.' });
-    Object.keys(S.catalog.suspended).forEach((id) => warnings.push({ title: App.sourceName(id) + ' adapter is globally suspended', detail: 'Publishing does not change the global switch. Participants cannot upload for this source until an owner restores it.' }));
+    if (roundRequired.length) warnings.push({ title: S.round.name + ' requirements', detail: 'Required: ' + App.requiredSourceIds().map(App.sourceName).join(' + ') + '. Instagram and Facebook optional. Unpaid.' });
+    Object.keys(S.catalog.suspended).forEach((id) => warnings.push({ title: App.sourceName(id) + ' uploads paused', detail: 'Publishing will not restore uploads; an owner must do so.' }));
     if (material) warnings.push({ title: 'Material change: every active participant must re-consent', detail: reconsentPending().length + ' already need it from v' + rel.version + '; ' + A.participants.filter((p) => p.status === 'active' && p.consentVersion === rel.consentVersion).length + ' more will after v' + nextVersion + '.' });
     const ready = changes.length > 0;
     const hero =
-      '<div class="admin-release-hero ' + (ready ? 'is-ready' : 'is-idle') + '"><div><span class="admin-eyebrow">Next release · v' + nextVersion + '</span><h2>' + (ready ? 'Ready to publish' : 'Nothing to publish yet') + '</h2><p>' + (ready ? 'All readiness checks pass. Publication writes one immutable release and switches the active pointer in the same transaction.' : 'The draft matches release v' + rel.version + '. Use the simulation buttons to draft a change, then review what it means for participants.') + '</p></div>' +
+      '<div class="admin-release-hero ' + (ready ? 'is-ready' : 'is-idle') + '"><div><span class="admin-eyebrow">Next release · v' + nextVersion + '</span><h2>' + (ready ? 'Ready to publish' : 'No draft changes') + '</h2><p>' + (ready ? changes.length + ' change' + (changes.length === 1 ? '' : 's') + ' to review. Demo only.' : 'Choose a simulated edit below.') + '</p></div>' +
       '<div class="btn-row"><button type="button" class="btn btn-primary" data-action="a-publish" ' + (ready ? '' : 'disabled') + '>' + icon('rocket') + ' Publish release v' + nextVersion + '</button></div></div>';
-    const toolbar = '<div class="admin-toolbar"><span class="small muted">Simulate a draft edit:</span><button type="button" class="btn btn-secondary btn-sm" data-action="a-change" data-kind="consent">' + icon('pencil', 'ico-sm') + ' Edit consent wording (material)</button><button type="button" class="btn btn-secondary btn-sm" data-action="a-change" data-kind="contact">' + icon('pencil', 'ico-sm') + ' Edit coordinator contact (non-material)</button><button type="button" class="btn btn-secondary btn-sm" data-action="a-change" data-kind="guide">' + icon('pencil', 'ico-sm') + ' Edit YouTube guide (non-material)</button></div>';
-    const blockers = panel('Blocking checks', null, '<div class="notice notice-success" style="margin:0">' + icon('check-circle') + '<p>No blocking checks. Governance, contacts, consent, collection rounds, source and field policy, guide snapshots, communication templates, dates, compensation, retention and deletion terms are complete.</p></div>', 'check-circle');
+    const toolbar = '<div class="admin-toolbar"><span class="small muted">Simulate edit:</span><button type="button" class="btn btn-secondary btn-sm" data-action="a-change" data-kind="consent">' + icon('pencil', 'ico-sm') + ' Consent wording</button><button type="button" class="btn btn-secondary btn-sm" data-action="a-change" data-kind="contact">' + icon('pencil', 'ico-sm') + ' Coordinator contact</button><button type="button" class="btn btn-secondary btn-sm" data-action="a-change" data-kind="guide">' + icon('pencil', 'ico-sm') + ' YouTube guide</button></div>';
+    const blockers = panel('Readiness', null, '<div class="notice notice-success" style="margin:0">' + icon('check-circle') + '<p>All checks pass.</p></div>' + details('View checked items', '<p>Governance, contacts, consent, rounds, data policy, guides, communications, dates, payment, retention and deletion terms.</p>'), 'check-circle');
     const warn = panel('Warnings to review', null, warnings.length ? '<ul class="admin-issue-list">' + warnings.map((w) => '<li class="is-warning"><span><strong>' + esc(w.title) + '</strong><span>' + esc(w.detail) + '</span></span>' + badge('review required') + '</li>').join('') + '</ul>' : '<p class="small muted" style="margin:0">No warnings.</p>', 'warning-circle');
     const changesHtml = changes.length ? '<ul class="admin-release-changes">' + changes.map((c) => '<li><span><strong>' + esc(c.section) + '</strong><span>' + esc(c.summary) + '</span></span>' + badge(c.material ? 're-consent required' : 'non-material') + '</li>').join('') + '</ul>' : '<p class="small muted" style="margin:0">No draft changes compared with release v' + rel.version + '.</p>';
-    const reconsent = material ? '<div class="admin-reconsent-check"><label class="check-row"><input type="checkbox" data-change="a-reconsent" ' + (A.release.reconsentAck ? 'checked' : '') + ' /><span><span class="check-text"><strong>I understand this release will require re-consent.</strong></span><span class="check-desc">Existing consents remain valid for the release they were given for; new sessions and donation attempts require consent ' + esc(A.release.consentVersionDraft || rel.consentVersion) + '.</span></span></label></div>' : '';
-    const history = panel('Release history', null, '<ul class="admin-release-history">' + S.releases.slice().sort((a, b) => b.version - a.version).map((r) => '<li><span><strong>Release v' + r.version + '</strong><span>Published ' + esc(E.formatDateTime(r.publishedAt)) + ' by ' + esc(r.publishedBy) + ' · consent ' + esc(r.consentVersion) + ' · policy ' + esc(E.shortHash(App.hashesFor(r.id).materialHash, 10, 6)) + '</span></span><span class="btn-row">' + (r.requiresReconsent ? badge('re-consent required') : '') + badge(r.status) + '</span></li>').join('') + '</ul>', 'clock-ccw');
-    return pageHeader(project().name, 'Review & publish', 'Check the setup, see what changed, and publish a new locked version of the study.') + hero + toolbar + '<div class="admin-two-column">' + blockers + warn + '</div>' + panel('Changes in this release', 'Compared with the current version (v' + rel.version + '). Changes to consent, what is collected, payment, how long data is kept or how it is deleted mean participants must agree again.', changesHtml + reconsent, 'list-checks') + history;
+    const reconsent = material ? '<div class="admin-reconsent-check"><label class="check-row"><input type="checkbox" data-change="a-reconsent" ' + (A.release.reconsentAck ? 'checked' : '') + ' /><span><span class="check-text"><strong>I understand participants must agree again.</strong></span><span class="check-desc">Consent ' + esc(A.release.consentVersionDraft || rel.consentVersion) + ' is required before their next donation.</span></span></label></div>' : '';
+    const history = details('Release history (' + S.releases.length + ')', '<ul class="admin-release-history">' + S.releases.slice().sort((a, b) => b.version - a.version).map((r) => '<li><span><strong>Release v' + r.version + '</strong><span>Published ' + esc(E.formatDateTime(r.publishedAt)) + ' by ' + esc(r.publishedBy) + ' · consent ' + esc(r.consentVersion) + ' · policy ' + esc(E.shortHash(App.hashesFor(r.id).materialHash, 10, 6)) + '</span></span><span class="btn-row">' + (r.requiresReconsent ? badge('re-consent required') : '') + badge(r.status) + '</span></li>').join('') + '</ul>');
+    return pageHeader(project().name, 'Review & publish', null) + hero + toolbar + '<div class="admin-two-column">' + blockers + warn + '</div>' + panel('Changes since v' + rel.version, null, changesHtml + reconsent, 'list-checks') + details('Publishing & consent rules', '<p>Publication creates a locked release. Changes to consent, collected data, payment, retention or deletion require participants to agree again. Earlier consent evidence stays unchanged.</p><p>This demo changes only this page; no real project is published.</p>') + history;
   }
 
   function screenSystem() {
@@ -273,18 +276,18 @@
       const control = s.capabilityStatus === 'donation_ready' ? (suspended ? '<button type="button" class="btn btn-secondary btn-sm" data-action="a-restore" data-source="' + s.id + '">Restore uploads</button>' : '<button type="button" class="btn btn-danger btn-sm" data-action="a-suspend" data-source="' + s.id + '">Suspend uploads</button>') : '<span class="muted xs">cannot be promoted</span>';
       return '<tr><td><strong>' + esc(s.displayName) + '</strong>' + (s.exportFormatVerifiedOn ? '<div class="xs muted">verified ' + esc(s.exportFormatVerifiedOn) + '</div>' : '') + '</td><td>' + badge(s.capabilityStatus) + '</td><td>' + operational + '</td><td>' + control + '</td></tr>';
     }).join('');
-    const catalog = panel('Global source adapters', 'Pausing a service is an emergency switch for owners, with a reason on record. Participants lose the upload button for that service immediately; every donation is re-checked against this switch.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Source</th><th>Base capability</th><th>Operational state</th><th>Control</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'sliders');
-    const releaseInfo = panel('Release information', null, '<dl class="admin-definition-list"><dt>Application version</dt><dd><code>' + esc(sys.appVersion) + '</code></dd><dt>Deployment profile</dt><dd>' + esc(sys.deploymentProfile) + '</dd><dt>Last backup</dt><dd>' + badge(sys.backup.status) + ' ' + esc(E.formatDateTime(sys.backup.completedAt)) + '</dd><dt>Umbrella projects</dt><dd>' + D.PROJECTS.length + ' (' + D.PROJECTS.filter((p) => p.lifecycle === 'active').length + ' active)</dd></dl>', 'info');
-    return pageHeader('Operations', 'System', 'Fictional health and deployment information. No live service, backup, storage or security checks run in this offline demo.') + '<section class="admin-panel admin-health-hero"><div><span class="admin-eyebrow">Simulated status</span><h2>' + badge(sys.status) + ' Example services</h2></div><span class="step-up-note ' + (stepUpFresh() ? 'is-fresh' : '') + '">' + icon('key', 'ico-sm') + (stepUpFresh() ? 'Demo step-up verified' : 'Demo step-up required for controls') + '</span></section>' + health + catalog + releaseInfo;
+    const catalog = panel('Global source adapters', 'Suspending a source immediately blocks its uploads.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Source</th><th>Base capability</th><th>Operational state</th><th>Control</th></tr></thead><tbody>' + rows + '</tbody></table></div>' + details('Suspension safeguards', '<p>Only owners can suspend a source, with a recorded reason and step-up verification. Every donation re-checks this switch; published releases are unchanged.</p>'), 'sliders');
+    const releaseInfo = details('Deployment & backup details', '<dl class="admin-definition-list"><dt>Application version</dt><dd><code>' + esc(sys.appVersion) + '</code></dd><dt>Deployment profile</dt><dd>' + esc(sys.deploymentProfile) + '</dd><dt>Last backup</dt><dd>' + badge(sys.backup.status) + ' ' + esc(E.formatDateTime(sys.backup.completedAt)) + '</dd><dt>Umbrella projects</dt><dd>' + D.PROJECTS.length + ' (' + D.PROJECTS.filter((p) => p.lifecycle === 'active').length + ' active)</dd></dl>');
+    return pageHeader('Operations', 'System', 'Simulated health. No live service or security checks.') + '<section class="admin-panel admin-health-hero"><div><h2>' + badge(sys.status) + ' Example services</h2></div><span class="step-up-note ' + (stepUpFresh() ? 'is-fresh' : '') + '">' + icon('key', 'ico-sm') + (stepUpFresh() ? 'Demo step-up verified' : 'Demo step-up required') + '</span></section>' + health + catalog + releaseInfo;
   }
 
   function screenRounds() {
-    const list = '<ul class="admin-round-list">' + D.ROUNDS.map((r) => {
+    const list = '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Round</th><th>Required sources</th><th>Complete</th><th>Partial</th><th>Accepted donations</th><th>Status</th></tr></thead><tbody>' + D.ROUNDS.map((r) => {
       const required = requiredForRound(r);
       const states = A.participants.map((p) => participantRoundStatus(p, r));
-      return '<li><span><strong>' + esc(r.name) + ' <span class="admin-mono xs muted">' + esc(r.roundKey) + '</span></strong><span>Opens ' + esc(E.formatDate(r.startsAt)) + ' · donations close ' + esc(E.formatDate(r.donationsCloseAt)) + ' · access ends ' + esc(E.formatDate(r.participantAccessEndsAt)) + '</span><span>Required: ' + esc(required.map(App.sourceName).join(' + ') || 'none') + ' · eligibility: ' + esc(r.eligibilityMode.replace(/_/g, ' ')) + ' · unpaid</span><span>' + states.filter((state) => state === 'complete').length + ' completed · ' + states.filter((state) => state === 'partial').length + ' partial · ' + acceptedDonations(r.roundKey).length + ' accepted donations</span></span>' + badge(r.status) + '</li>';
-    }).join('') + '</ul>';
-    return pageHeader(project().name, 'Collection rounds', 'Each round is a separate collection pass. An accepted donation in an earlier round does not block a new donation in the current open round.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-not-in-tour">New round</button>') + panel('Rounds', 'Fictional progress shown separately for each round.', list, 'flag') + '<div class="notice notice-info">' + icon('info') + '<p>Round 2 requires TikTok and YouTube. Instagram and Facebook remain optional, even after those required donations are complete. All participation is unpaid; skips do not count as accepted donations.</p></div>';
+      return '<tr><td><strong>' + esc(r.name) + '</strong>' + details('Dates & eligibility', '<dl class="admin-definition-list"><dt>Round key</dt><dd>' + esc(r.roundKey) + '</dd><dt>Opens</dt><dd>' + esc(E.formatDate(r.startsAt)) + '</dd><dt>Donations close</dt><dd>' + esc(E.formatDate(r.donationsCloseAt)) + '</dd><dt>Access ends</dt><dd>' + esc(E.formatDate(r.participantAccessEndsAt)) + '</dd><dt>Eligibility</dt><dd>' + esc(r.eligibilityMode.replace(/_/g, ' ')) + '</dd></dl>') + '</td><td>' + esc(required.map(App.sourceName).join(' + ') || 'None') + '</td><td>' + states.filter((state) => state === 'complete').length + '</td><td>' + states.filter((state) => state === 'partial').length + '</td><td>' + acceptedDonations(r.roundKey).length + '</td><td>' + badge(r.status) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+    return pageHeader(project().name, 'Collection rounds', 'Progress is separate for each round.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-not-in-tour">New round</button>') + panel('Rounds', null, list, 'flag') + '<div class="notice notice-info">' + icon('info') + '<p>Instagram and Facebook are optional. Participation is unpaid; skips do not count.</p></div>' + details('How rounds work', '<p>A donation in an earlier round does not block one in the current open round. Optional sources remain available after the required donations are complete.</p>');
   }
 
   function screenWithdrawals() {
@@ -297,12 +300,12 @@
       else action = '<span class="xs muted">Evidence recorded</span>';
       return '<tr class="' + (w.isNew ? 'is-new' : '') + '"><td class="admin-mono">' + esc(w.participantId) + '</td><td>' + esc(E.formatDateTime(w.requestedAt)) + '</td><td>' + esc(E.formatDate(w.deadlineAt)) + '</td><td>' + badge(w.status) + '</td><td>' + (job ? badge(job.status) + '<div class="xs muted">' + esc(job.scope || '') + '</div>' : '<span class="muted">—</span>') + '</td><td>' + action + '</td></tr>';
     }).join('');
-    const queue = panel('Withdrawal queue', 'Deadlines come from the release SLA in the project timezone. The approval control never extends a promised deadline.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Participant</th><th>Requested</th><th>Deadline</th><th>Status</th><th>Deletion job</th><th>Action</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'list-checks');
+    const queue = panel('Withdrawal queue', null, '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Participant</th><th>Requested</th><th>Deadline</th><th>Status</th><th>Deletion job</th><th>Action</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'list-checks');
     const jobs = A.withdrawals.filter((w) => w.deletionJob).map((w) => {
       const j = w.deletionJob;
       return '<li><span><strong>' + esc(j.id) + ' · ' + esc(w.participantId) + '</strong><span>' + esc(j.scope || '') + ' · proposed by ' + esc(j.proposedBy) + ' ' + esc(E.formatDate(j.proposedAt)) + (j.approvedBy ? ' · approved by ' + esc(j.approvedBy) : ' · awaiting approval by a different owner') + (j.completedAt ? ' · completed ' + esc(E.formatDateTime(j.completedAt)) + ' with deletion evidence' : '') + '</span>' + (j.reason ? '<span>Reason: ' + esc(j.reason) + '</span>' : '') + '</span>' + badge(j.status) + '</li>';
     }).join('');
-    return pageHeader(project().name, 'Withdrawals & deletion', 'Erasing data takes two people: one proposes it with a reason, a different owner approves it, then the system deletes the files and records proof.') + queue + panel('Deletion jobs', null, jobs ? '<ul class="admin-release-history">' + jobs + '</ul>' : '<p class="small muted" style="margin:0">No deletion jobs.</p>', 'trash');
+    return pageHeader(project().name, 'Withdrawals & deletion', 'Deletion requires approval from a different owner.') + queue + details('Deletion job history', jobs ? '<ul class="admin-release-history">' + jobs + '</ul>' : '<p>No deletion jobs.</p>') + details('Deadlines & deletion safeguards', '<p>Deadlines follow the release terms in the project timezone; approval never extends them. One person proposes a deletion with a reason, a different owner approves it, and the system records deletion evidence.</p>');
   }
 
   function screenParticipants() {
@@ -318,22 +321,22 @@
       const reconsent = participantNeedsReconsent(p);
       return '<tr class="' + (p.isNew ? 'is-new' : '') + '"><td class="admin-mono">' + esc(p.id) + '</td><td>' + badge(status) + '</td><td>' + esc(E.formatDate(p.invitedAt)) + '</td><td>' + (consent ? esc(consent) + (consentReleaseId ? '<div class="xs muted">' + esc(consentReleaseId) + '</div>' : '') + (reconsent ? ' ' + badge('re-consent required') : '') : '<span class="muted">—</span>') + '</td>' + roundCells + '<td class="xs muted">' + esc(note) + '</td></tr>';
     }).join('');
-    return pageHeader(project().name, 'Participants & access', 'Fictional participant codes and round-specific progress. Links created here are demo-only and cannot grant access to the real study.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-provision">' + icon('id-card', 'ico-sm') + ' Provision participant</button>') + panel('Participants', 'Historical progress is preserved; only accepted donations count toward the current round.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Participant</th><th>Status</th><th>Invited</th><th>Consent</th>' + D.ROUNDS.map((round) => '<th>' + esc(round.name) + '</th>').join('') + '<th></th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'id-card');
+    return pageHeader(project().name, 'Participants & access', 'Demo links cannot grant access to a real study.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-provision">' + icon('id-card', 'ico-sm') + ' Provision participant</button>') + panel('Participants', 'Only accepted donations count toward round progress.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Participant</th><th>Status</th><th>Invited</th><th>Consent</th>' + D.ROUNDS.map((round) => '<th>' + esc(round.name) + '</th>').join('') + '<th></th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'id-card');
   }
 
   function screenAudit() {
-    const rows = A.audit.map((a) => '<tr class="' + (a.isNew ? 'is-new' : '') + '"><td class="xs" style="white-space:nowrap">' + esc(E.formatDateTime(a.at)) + '</td><td class="admin-mono">' + esc(a.action) + '</td><td>' + esc(a.actor) + '</td><td class="admin-mono">' + esc(a.subject || '') + '</td><td>' + esc(a.summary) + '</td></tr>').join('');
-    return pageHeader(project().name, 'Project audit', 'Who did what to which record, when. Audit details never contain raw Study IDs, tokens, or payload content.') + panel('Audit events', 'Newest first. Rows in green were written during this session.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>When</th><th>Action</th><th>Actor</th><th>Subject</th><th>Summary</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'clock-ccw');
+    const rows = A.audit.map((a) => '<tr class="' + (a.isNew ? 'is-new' : '') + '"><td class="xs" style="white-space:nowrap">' + esc(E.formatDateTime(a.at)) + '</td><td class="admin-mono">' + esc(a.action) + '</td><td>' + esc(a.actor) + '</td><td class="admin-mono">' + esc(a.subject || '') + '</td><td>' + details('View event details', '<p>' + esc(a.summary) + '</p>') + '</td></tr>').join('');
+    return pageHeader(project().name, 'Project audit', 'No raw Study IDs, tokens or payloads.') + panel('Audit events', 'Newest first · green rows are new this session.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>When</th><th>Action</th><th>Actor</th><th>Subject</th><th>Details</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'clock-ccw');
   }
 
   function screenSources() {
     const rel = activeRelease();
     const rows = D.SOURCES.map((s) => {
       const p = rel.sourcePolicies.find((x) => x.sourceId === s.id);
-      const summary = p && p.mode === 'donation' ? p.categories.map((c) => (c.enabled ? '<div><b>' + esc(c.id) + '</b>: ' + c.fields.map((f) => f.mode === 'prohibited' ? '<s>' + esc(f.id) + '</s>' : esc(f.id) + (f.mode === 'optional' ? (f.defaultIncluded ? ' (on)' : ' (off)') : '')).join(', ') + '</div>' : '<div><s>' + esc(c.id) + '</s> disabled</div>')).join('') : '<span class="muted">—</span>';
+      const summary = p && p.mode === 'donation' ? details(p.categories.filter((c) => c.enabled).length + ' categories · view fields', p.categories.map((c) => (c.enabled ? '<div><b>' + esc(c.id) + '</b>: ' + c.fields.map((f) => f.mode === 'prohibited' ? '<s>' + esc(f.id) + '</s>' : esc(f.id) + (f.mode === 'optional' ? (f.defaultIncluded ? ' (on)' : ' (off)') : '')).join(', ') + '</div>' : '<div><s>' + esc(c.id) + '</s> disabled</div>')).join('')) : '<span class="muted">—</span>';
       return '<tr><td><strong>' + esc(s.displayName) + '</strong><div class="xs muted">' + badge(s.capabilityStatus) + '</div></td><td>' + badge(p ? p.mode : 'disabled') + '</td><td>' + (App.requiredSourceIds().includes(s.id) ? 'Yes' : 'No') + '</td><td class="xs">' + summary + '</td></tr>';
     }).join('');
-    return pageHeader(project().name, 'Sources & data policy', 'This study includes all available approved records, all dates and every approved field when present. Participants may exclude individual records, not fields or categories.') + panel('Version ' + rel.version + ' data policy', 'Read-only demo. Required-source labels include the effective ' + S.round.name + ' requirements. Facebook search words and potentially private group links are explicitly disclosed in the scope notice.', '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Source</th><th>Mode</th><th>Required in ' + esc(S.round.name) + '</th><th>Data policy</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'database');
+    return pageHeader(project().name, 'Sources & data policy', 'All dates · approved fields · individual records can be excluded.') + panel('Version ' + rel.version + ' data policy', null, '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Source</th><th>Mode</th><th>Required in ' + esc(S.round.name) + '</th><th>Data policy</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'database') + details('Collection scope & sensitive fields', '<p>This read-only policy includes all available approved records and fields. Participants can exclude individual records, not fields or categories. Required labels include the current round requirements.</p><p>The scope notice discloses Facebook search words and potentially private group links.</p>');
   }
 
   function screenAdministrators() {

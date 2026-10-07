@@ -185,7 +185,21 @@
   }
 
   function privacyStatus() {
-    return '<div class="privacy-status" role="status">' + icon('shield-check') + '<span><strong>Synthetic, local demo only</strong>No real files are read, no data is uploaded, and no external posts are opened.</span></div>';
+    return '<div class="privacy-status" role="status">' + icon('shield-check') + '<span>Fictional samples · stays on this page · no uploads</span></div>';
+  }
+
+  function shortSourceScope(source) {
+    const scopes = {
+      tiktok: 'Watched-video dates and links',
+      youtube: 'Video and post history, links, titles and channels',
+      instagram: 'Watched-video dates and links',
+      facebook: 'Feed-shown posts/videos and main search history',
+    };
+    return scopes[source.id] || source.description;
+  }
+
+  function sensitiveSourceNotice(sourceId) {
+    return sourceId === 'facebook' ? '<p class="notice notice-warn">Feed-shown does not mean watched or read. Exact search words and group/private links may be sensitive.</p>' : '';
   }
 
   function miniHeader() {
@@ -369,18 +383,18 @@
 
     if (P.status === 'withdrawn') {
       return (
-        miniHeader() +
+        miniHeader() + privacyStatus() +
         '<span class="eyebrow">' + esc(pr.name) + '</span><h1>Participant access has ended</h1>' +
-        '<p class="lede">Your withdrawal request was received. Access links and sessions for this project were revoked, and no information was changed by opening this page.</p>' +
+        '<p class="lede">Your example withdrawal is complete; access has ended.</p>' +
         '<div class="card"><dl class="receipt-list"><dt>Request received</dt><dd>' + esc(E.formatDateTime(P.withdrawal.requestedAt)) + '</dd><dt>Deletion deadline</dt><dd>' + esc(E.formatDate(P.withdrawal.deadlineAt)) + '</dd></dl></div>' +
         '<p class="small muted" style="margin-top:1rem">Use “Reset demo” in the top bar to start the tour again.</p>'
       );
     }
 
     const returning = P.consent.agreed;
-    let html = miniHeader() + '<span class="eyebrow">' + esc(pr.name) + ' · ' + esc(pr.institution) + '</span>';
+    let html = miniHeader() + privacyStatus() + '<span class="eyebrow">' + esc(pr.name) + '</span>';
     if (returning) {
-      html += '<h1>Your study activity</h1><p class="lede">Continue when you are ready. This demo keeps synthetic progress only in page memory. In the live study, saved checkpoints never include your export file or unfinished choices.</p>';
+      html += '<h1>Your study activity</h1><p class="lede">Pick up where you left off.</p>';
       html += '<div class="card"><h2 style="font-size:1.05rem">' + esc(S.round.name) + '</h2><div class="progress-table">';
       for (const s of sources) {
         const donation = roundDonations().find((d) => d.platform === s.id);
@@ -390,13 +404,13 @@
       }
       html += '</div>';
       const missing = requiredMissing();
-      if (missing.length) html += '<div class="notice notice-info" style="margin-top:1rem">' + icon('info') + '<p>Collection round incomplete. Still needed: <strong>' + esc(missing.map(App.sourceName).join(', ')) + '</strong>.</p></div>';
-      else if (roundDonations().length) html += '<div class="notice notice-success" style="margin-top:1rem">' + icon('check-circle') + '<p>Your required donations for this round are complete. Thank you.</p></div>';
+      if (missing.length) html += '<div class="notice notice-info" style="margin-top:1rem">' + icon('info') + '<p>Still needed: <strong>' + esc(missing.map(App.sourceName).join(', ')) + '</strong>.</p></div>';
+      else if (roundDonations().length) html += '<div class="notice notice-success" style="margin-top:1rem">' + icon('check-circle') + '<p>Required sources complete. Thank you.</p></div>';
       html += '</div>';
       const earlier = P.donations.filter((donation) => donation.status === 'accepted' && donation.roundKey !== S.round.roundKey);
       if (earlier.length) html += '<details><summary>Earlier-round example receipts (' + earlier.length + ')</summary><ul>' + earlier.map((donation) => '<li>' + esc(App.sourceName(donation.platform)) + ' · ' + esc(donation.receiptCode) + ' · ' + esc(donation.roundKey) + '</li>').join('') + '</ul><p class="small muted">These preserved examples do not count toward the current round.</p></details>';
       if (consentStale()) {
-        html += '<div class="notice notice-warn" style="margin-top:1rem">' + icon('warning-circle') + '<p>The study updated its terms (version ' + rel.version + '). Your earlier consent stays on record, but you must review and agree again before donating more.</p></div>';
+        html += '<div class="notice notice-warn" style="margin-top:1rem">' + icon('warning-circle') + '<p>Study version ' + rel.version + ': review the updated consent to continue. Your earlier consent is preserved.</p></div>';
       }
       html += '<div class="screen-actions">' +
         (consentStale() ? '<button type="button" class="btn btn-primary" data-action="p-go" data-step="consent">Review updated consent</button>' : availableSources().length ? '<button type="button" class="btn btn-primary" data-action="p-go" data-step="sources">Continue</button>' : '') +
@@ -405,19 +419,17 @@
       return html;
     }
 
-    html += '<h1>Review the study before you decide</h1>';
-    html += '<p class="lede">' + esc(pr.purpose) + ' You choose whether to participate and exactly what data to donate.</p>';
-    html += '<dl class="schedule-grid"><div><dt>Demo timing</dt><dd>Explore at your own pace</dd></div><div><dt>Donations close</dt><dd>' + esc(E.formatDate(pr.donationsCloseAt)) + '</dd></div><div><dt>Participant access ends</dt><dd>' + esc(E.formatDate(pr.participantAccessEndsAt)) + '</dd></div></dl>';
-    html += '<h2 style="font-size:1.05rem">Supported data sources</h2><p class="small muted" style="margin-bottom:0.25rem">The study can accept an export from:</p><ul class="source-list-compact">' +
-      sources.map((s) => '<li><span class="source-icon">' + esc(s.letter) + '</span>' + esc(s.displayName) + (required.includes(s.id) ? ' <span class="tile-badge required">Required</span>' : '') + (App.sourceSuspended(s.id) ? ' ' + badge('suspended') : '') + '</li>').join('') + '</ul>';
-    html += '<h2 style="font-size:1.05rem;margin-top:1.25rem">What you can count on</h2><ul class="trust-list">' +
-      '<li>' + icon('check-circle') + 'Your original file stays on this device.</li>' +
-      '<li>' + icon('check-circle') + 'Only what this study is approved to collect can be shared (study version ' + rel.version + ').</li>' +
-      '<li>' + icon('check-circle') + 'You review the outgoing copy before anything is sent.</li>' +
-      (comp.mode !== 'none' ? '<li>' + icon('check-circle') + esc(App.money(comp.amountCents, comp.currency)) + ' after completing the project donation.</li>' : '') +
-      '</ul>';
-    html += '<p class="xs muted" style="margin-top:1rem">Governance: ' + badge(pr.governanceStatus) + ' ' + esc(pr.governanceReference) + ' · Contact: ' + esc(pr.coordinatorEmail) + '</p>';
+    html += '<h1>Try a data donation</h1>';
+    html += '<p class="lede">Review the study, choose a sample, then decide what to share.</p>';
+    html += '<ul class="source-list-compact">' + sources.map((s) => '<li><span class="source-icon">' + esc(s.letter) + '</span>' + esc(s.displayName) + ' <span class="tile-badge ' + (required.includes(s.id) ? 'required' : '') + '">' + (required.includes(s.id) ? 'Required' : 'Optional') + '</span>' + (App.sourceSuspended(s.id) ? ' ' + badge('suspended') : '') + '</li>').join('') + '</ul>';
+    html += '<p class="small muted">' + (comp.mode !== 'none' ? esc(App.money(comp.amountCents, comp.currency)) + ' after completing the project donation.' : 'Unpaid · participation is your choice') + '</p>';
     html += '<div class="screen-actions"><button type="button" class="btn btn-primary" data-action="p-go" data-step="consent">Continue to consent ' + icon('arrow-right') + '</button></div>';
+    html += '<details class="compact-details"><summary>Study details and privacy</summary><p>' + esc(pr.purpose) + '</p><ul class="trust-list">' +
+      '<li>' + icon('check-circle') + 'Your original file stays on this device.</li>' +
+      '<li>' + icon('check-circle') + 'Only study-approved data can be shared (version ' + rel.version + ').</li>' +
+      '<li>' + icon('check-circle') + 'Review the outgoing copy before sending.</li></ul>' +
+      '<dl class="schedule-grid"><div><dt>Donations close</dt><dd>' + esc(E.formatDate(pr.donationsCloseAt)) + '</dd></div><div><dt>Access ends</dt><dd>' + esc(E.formatDate(pr.participantAccessEndsAt)) + '</dd></div></dl>' +
+      '<p class="small muted">' + badge(pr.governanceStatus) + ' ' + esc(pr.governanceReference) + '<br>Contact: ' + esc(pr.coordinatorEmail) + '</p></details>';
     return html;
   }
 
@@ -427,8 +439,7 @@
     const consent = D.CONSENT;
     const reconsent = consentStale();
     let html = stepper(0) + privacyStatus();
-    html += '<h1>Research consent</h1><p class="notice notice-info">Sample consent only. Use an invented name; this page does not enroll you in the study.</p><p class="muted small">Consent version ' + esc(rel.consentVersion) + ' · study version ' + rel.version + '</p>';
-    if (rel.participantDataScopeNotice) html += '<div class="notice notice-info"><p>' + esc(rel.participantDataScopeNotice) + '</p></div>';
+    html += '<h1>Research consent</h1><p class="lede">Read the sample agreement, then sign with an invented name.</p>';
 
     if (c.agreed && !reconsent) {
       html += '<div class="notice notice-success">' + icon('check-circle') + '<p>You agreed to consent version ' + esc(c.version) + ' on ' + esc(E.formatDateTime(c.recordedAt)) + '. Receipt <span class="receipt-inline">' + esc(c.receiptCode) + '</span></p></div>';
@@ -438,14 +449,17 @@
     if (reconsent) {
       html += '<div class="notice notice-warn">' + icon('warning-circle') + '<p>The study updated its terms (version ' + rel.version + '). Please review and agree again before continuing.</p></div>';
     }
-    html += '<h2 style="font-size:1.05rem">Key points</h2><dl class="consent-points">' +
+    html += '<p class="small muted">Unpaid and voluntary · no real enrollment</p>';
+    html += sensitiveSourceNotice(App.donationSources().some((source) => source.id === 'facebook') ? 'facebook' : '');
+    html += '<details class="compact-details"><summary>Study scope and key points</summary><p class="muted small">Consent ' + esc(rel.consentVersion) + ' · study version ' + rel.version + '</p><dl class="consent-points">' +
       '<div><dt>Purpose</dt><dd>' + esc(consent.summary.purpose) + '</dd></div>' +
       '<div><dt>What you share</dt><dd>' + esc(consent.summary.whatYouShare) + '</dd></div>' +
       '<div><dt>Possible risks</dt><dd>' + esc(consent.summary.risks) + '</dd></div>' +
-      '<div><dt>Your choice</dt><dd>' + esc(consent.summary.voluntary) + '</dd></div></dl>';
+      '<div><dt>Your choice</dt><dd>' + esc(consent.summary.voluntary) + '</dd></div></dl>' +
+      (rel.participantDataScopeNotice ? '<p>' + esc(rel.participantDataScopeNotice) + '</p>' : '') + '</details>';
     html += '<h2 style="font-size:1.05rem">Read the full consent document</h2>' +
       '<div class="consent-doc" id="consent-doc" tabindex="0" aria-label="Consent document, scroll to the end">' + consent.paragraphs.map((p) => '<p>' + esc(p) + '</p>').join('') + '</div>' +
-      '<div class="consent-status ' + (c.scrolled ? 'is-done' : '') + '" id="consent-status">' + (c.scrolled ? icon('check-circle', 'ico-sm') + ' Complete consent reviewed. You may continue with the consent requirements.' : icon('info', 'ico-sm') + ' Scroll to the end of the document to continue.') + '</div>';
+      '<div class="consent-status ' + (c.scrolled ? 'is-done' : '') + '" id="consent-status">' + (c.scrolled ? icon('check-circle', 'ico-sm') + ' Full consent reviewed.' : icon('info', 'ico-sm') + ' Scroll to the end to continue.') + '</div>';
     if (consent.questions.length) html += '<h2 style="font-size:1.05rem;margin-top:1.25rem">Check your understanding</h2>';
     for (const q of consent.questions) {
       const answer = c.answers[q.id];
@@ -455,23 +469,23 @@
         (answer === undefined ? '' : answer === q.correct ? '<div class="question-feedback ok">Correct.</div>' : '<div class="question-feedback bad">Not quite. Re-read the “What you share” section and try again.</div>') +
         '</fieldset>';
     }
-    html += '<h2 style="font-size:1.05rem;margin-top:1.25rem">Electronic signature</h2><div class="signature-box"><label class="field-label" for="sig">Type your name to sign</label><input class="text-input input-sm" id="sig" type="text" placeholder="Demo Participant" value="' + esc(c.signature) + '" data-input="consent-signature" autocomplete="off" /><div class="xs muted" style="margin-top:0.3rem">Type an invented name only. This synthetic consent stays in page memory and is not a real agreement.</div></div>';
+    html += '<div class="signature-box"><label class="field-label" for="sig">Invented name</label><input class="text-input input-sm" id="sig" type="text" placeholder="Demo Participant" value="' + esc(c.signature) + '" data-input="consent-signature" autocomplete="off" /></div>';
     const allCorrect = consent.questions.every((q) => c.answers[q.id] === q.correct);
     const ready = c.scrolled && allCorrect && c.signature.trim().length > 1;
     html += '<div class="screen-actions"><button type="button" class="btn btn-primary" data-action="p-consent-agree" ' + (ready ? '' : 'disabled') + '>I agree and want to take part</button><button type="button" class="btn btn-ghost" data-action="p-go" data-step="join">Back</button></div>';
-    if (!ready) html += '<p class="xs muted" style="margin-top:0.5rem">To continue: ' + [!c.scrolled ? 'read to the end' : null, !allCorrect ? 'answer the questions correctly' : null, c.signature.trim().length <= 1 ? 'type your name' : null].filter(Boolean).join(' · ') + '.</p>';
+    if (!ready) html += '<p class="xs muted" style="margin-top:0.5rem">To continue: ' + [!c.scrolled ? 'read to the end' : null, !allCorrect ? 'answer the questions correctly' : null, c.signature.trim().length <= 1 ? 'enter an invented name' : null].filter(Boolean).join(' · ') + '.</p>';
     return html;
   }
 
   function screenSources() {
     const required = App.requiredSourceIds();
     const donated = donatedIds();
-    let html = stepper(1) + privacyStatus() + '<h1>Your data sources</h1><p class="lede">Start with any source. TikTok and YouTube are required for this round; Instagram and Facebook are optional.</p><div class="platform-list">';
+    let html = stepper(1) + privacyStatus() + '<h1>Your data sources</h1><p class="lede">Choose a source to try.</p><div class="platform-list">';
     for (const source of App.donationSources()) {
       const done = donated.includes(source.id);
       const suspended = App.sourceSuspended(source.id);
       const started = P.selectedSources.includes(source.id) || P.work && P.work.sourceId === source.id;
-      html += '<article class="platform-tile simple-source' + (done ? ' is-done' : '') + (suspended ? ' is-suspended' : '') + '"><span class="source-icon">' + esc(source.letter) + '</span><div class="tile-body"><strong>' + esc(source.displayName) + '</strong><span>' + esc(source.description) + '</span><span class="tile-badge ' + (required.includes(source.id) ? 'required' : '') + '">' + (required.includes(source.id) ? 'Required' : 'Optional') + '</span>' + (done ? '<span>Completed for this collection round.</span>' : suspended ? '<span>Temporarily unavailable in this demo.</span>' : '') + '</div>' +
+      html += '<article class="platform-tile simple-source' + (done ? ' is-done' : '') + (suspended ? ' is-suspended' : '') + '"><span class="source-icon">' + esc(source.letter) + '</span><div class="tile-body"><strong>' + esc(source.displayName) + '</strong><span>' + esc(shortSourceScope(source)) + '</span><span class="tile-badge ' + (required.includes(source.id) ? 'required' : '') + '">' + (required.includes(source.id) ? 'Required' : 'Optional') + '</span>' + (suspended ? '<span>Temporarily unavailable</span>' : '') + '</div>' +
         (done ? '<span class="tile-badge done">Completed</span>' : '<button type="button" class="btn btn-primary" data-action="p-open-source" data-source="' + source.id + '" ' + (suspended ? 'disabled' : '') + '>' + (started ? 'Continue ' : 'Start ') + esc(source.displayName) + '</button>') + '</article>';
     }
     html += '</div><div class="screen-actions"><button type="button" class="btn btn-ghost" data-action="p-go" data-step="join">Study overview and receipts</button></div>';
@@ -482,11 +496,11 @@
     const source = D.sourceById(P.activeSource);
     const guide = source.exportGuide;
     const unavailable = P.guideOnly || App.sourceSuspended(source.id);
-    let html = stepper(2) + privacyStatus() + '<h1>Get your ' + esc(source.displayName) + ' data</h1>';
-    if (!unavailable) html += '<div class="card simple-shortcut"><p>Already have your export? The next screen uses a synthetic sample only.</p><button type="button" class="btn btn-primary" data-action="p-go" data-step="upload">I already have my file</button></div>';
-    html += '<p class="lede">' + esc(guide.intro) + '</p>';
+    let html = stepper(2) + privacyStatus() + '<h1>Get your ' + esc(source.displayName) + ' data</h1><p class="lede">Try a sample, or explore the download guide.</p>';
+    if (!unavailable) html += '<div class="screen-actions"><button type="button" class="btn btn-primary" data-action="p-go" data-step="upload">Continue with a sample</button></div>';
+    html += sensitiveSourceNotice(source.id);
     if (unavailable) html += '<p class="notice notice-warn">This source has download instructions only; adding a file is unavailable.</p>';
-    html += '<ol class="steplist">' + guide.steps.map((step) => '<li><span><strong>' + esc(step.title) + '</strong><span>' + esc(step.detail) + '</span></span></li>').join('') + '</ol><div class="notice">' + icon('hourglass') + '<p>' + esc(guide.wait) + '</p></div><div class="screen-actions"><button type="button" class="btn btn-ghost" data-action="p-go" data-step="sources">Back to sources</button></div>';
+    html += '<details class="compact-details"' + (unavailable ? ' open' : '') + '><summary>Download instructions</summary><p>' + esc(guide.intro) + '</p><ol class="steplist">' + guide.steps.map((step) => '<li><span><strong>' + esc(step.title) + '</strong><span>' + esc(step.detail) + '</span></span></li>').join('') + '</ol><div class="notice">' + icon('hourglass') + '<p>' + esc(guide.wait) + '</p></div></details><div class="screen-actions"><button type="button" class="btn btn-ghost" data-action="p-go" data-step="sources">Back to sources</button></div>';
     return html;
   }
 
@@ -494,16 +508,16 @@
     const source = D.sourceById(P.activeSource);
     const original = P.work;
     const processing = P.processing;
-    let html = stepper(2) + privacyStatus() + '<h1>' + (original ? 'Change' : 'Add') + ' your ' + esc(source.displayName) + ' file</h1><p class="lede">In the live study, you add one unchanged export file and review it on your device. This offline tour uses generated samples only: do not select or drop a real file.</p>';
-    if (original) html += '<div class="card simple-current-file"><strong>Current file</strong><p>' + esc(original.fileName) + '</p><p class="small muted">Your file and choices stay unchanged until a replacement succeeds.</p></div>';
+    let html = stepper(2) + privacyStatus() + '<h1>' + (original ? 'Change' : 'Add') + ' your ' + esc(source.displayName) + ' sample</h1><p class="lede">Use the example below. Do not add a real export.</p>';
+    if (original) html += '<div class="card simple-current-file"><strong>' + esc(original.fileName) + '</strong><p class="small muted">Kept with your choices until replacement succeeds.</p></div>';
     if (original && !workCurrent(original)) html += '<div class="notice notice-warn" role="status">The study version or collection round changed. Add a new synthetic sample for the current study before donating. The previous sample and choices are preserved until replacement succeeds.</div>';
     if (P.ui.fileError) html += '<div class="notice notice-danger" role="alert">' + esc(P.ui.fileError) + '</div>';
     if (App.sourceSuspended(source.id)) {
       html += '<p class="notice notice-warn">This source is temporarily unavailable.</p>';
     } else if (processing) {
-      html += '<section class="card" aria-label="Synthetic processing"><p role="status"><span class="spinner"></span> ' + esc(STAGE_LABELS[processing.stage]) + '</p><p class="small muted">Local simulation only. No real archive is read.</p><button type="button" class="btn btn-secondary" data-action="p-cancel-processing">Cancel processing</button></section>';
+      html += '<section class="card" aria-label="Synthetic processing"><p role="status"><span class="spinner"></span> ' + esc(STAGE_LABELS[processing.stage]) + '</p><button type="button" class="btn btn-secondary" data-action="p-cancel-processing">Cancel processing</button></section>';
     } else {
-      html += '<div class="upload-zone"><span class="flow-step-icon">' + icon('file-up', 'ico-lg') + '</span><p>Use a synthetic ' + esc(source.displayName) + ' sample.</p><button type="button" class="btn btn-primary" data-action="p-add-sample">' + (original ? 'Choose a different synthetic file' : 'Add synthetic sample file') + '</button><p class="small muted">Nothing is uploaded or saved outside this page.</p>' + (original ? '<button type="button" class="btn btn-ghost" data-action="p-invalid-sample">Try an invalid synthetic file</button>' : '') + '</div>';
+      html += '<div class="upload-zone"><span class="flow-step-icon">' + icon('file-up', 'ico-lg') + '</span><button type="button" class="btn btn-primary" data-action="p-add-sample">' + (original ? 'Replace sample' : 'Add sample') + '</button>' + (original ? '<details class="compact-details"><summary>Test a failed replacement</summary><button type="button" class="btn btn-ghost" data-action="p-invalid-sample">Try an invalid synthetic file</button></details>' : '') + '</div>';
     }
     html += '<div class="screen-actions">' + (original ? '<button type="button" class="btn btn-secondary" data-action="p-back-review">Back to review</button>' : '') + '<button type="button" class="btn btn-ghost" data-action="p-go" data-step="sources">Back to sources</button></div>';
     return html;
@@ -513,13 +527,14 @@
     const work = P.work;
     const counts = work.apply.counts;
     const dates = counts.dateRange;
-    return '<div class="simple-count"><strong>' + E.formatNumber(counts.totalSelected) + '</strong> ' + (counts.totalSelected === 1 ? 'record' : 'records') + ' selected<span>' + (counts.totalParticipantExcluded ? E.formatNumber(counts.totalParticipantExcluded) + ' removed' : 'All study-requested records included') + '</span></div>' +
-      '<p class="small muted simple-update" role="status">' + (work.finalized ? 'Review is up to date.' : 'Updating the synthetic review…') + '</p>' +
-      '<p><strong>Activity dates:</strong> ' + (dates.from ? esc(E.formatDate(dates.from)) + ' – ' + esc(E.formatDate(dates.to)) : 'No dated records selected') + '</p>' +
+    const labels = { timestamp: 'Date and time', contentRef: 'Link', title: 'Title', channelName: 'Channel name', searchTerm: 'Exact search words' };
+    return '<div class="simple-count"><strong>' + E.formatNumber(counts.totalSelected) + '</strong> ' + (counts.totalSelected === 1 ? 'record' : 'records') + ' selected<span>' + (counts.totalParticipantExcluded ? E.formatNumber(counts.totalParticipantExcluded) + ' removed' : 'All study-requested records') + '</span></div>' +
+      '<p class="small muted simple-update" role="status">' + (work.finalized ? 'Ready for review' : 'Updating review…') + '</p>' +
+      '<p><strong>Dates:</strong> ' + (dates.from ? esc(E.formatDate(dates.from)) + ' – ' + esc(E.formatDate(dates.to)) : 'No dated records selected') + '</p>' +
       '<dl class="simple-fields">' + work.extraction.categories.map((category) => {
         const count = counts.byCategory[category.id];
-        return '<div><dt>' + esc(category.label) + ' · ' + E.formatNumber(count.selected) + ' ' + (count.selected === 1 ? 'record' : 'records') + '</dt><dd>' + esc(category.fields.map((field) => field.label).join(', ')) + (count.selected ? '' : ' (no records selected)') + '</dd></div>';
-      }).join('') + '</dl><p class="small muted">All available dates are included. The study determines the details listed above; you can remove individual records below.</p>';
+        return '<div><dt>' + esc(category.label) + ' · ' + E.formatNumber(count.selected) + '</dt><dd>' + esc(category.fields.map((field) => labels[field.id] || field.label).join(', ')) + (count.selected ? '' : ' (none selected)') + '</dd></div>';
+      }).join('') + '</dl><p class="small muted">All available dates · approved fields only · missing values stay absent</p>';
   }
 
   function browseState(categoryId) {
@@ -557,7 +572,7 @@
     if (!category) return '<p>No study-requested records were found in this sample.</p>';
     const browser = browseState(category.id);
     const searchLabel = category.fields.some((field) => field.id === 'searchTerm') ? 'Search your search history' : category.fields.some((field) => field.id === 'title' || field.id === 'channelName') ? 'Search titles, channel names, or links' : 'Find an item by link or ID';
-    return '<p>Uncheck an item to leave it out. Check it again to restore it. Search stays on this page.</p>' +
+    return '<p>Uncheck to remove; check to restore. Search stays local.</p>' +
       (categories.length > 1 ? '<label class="field-label" for="record-category">Show activity</label><select id="record-category" class="select-input" data-change="p-record-category">' + categories.map((entry) => '<option value="' + entry.id + '" ' + (entry.id === category.id ? 'selected' : '') + '>' + esc(entry.label) + '</option>').join('') + '</select>' : '') +
       '<label class="field-label" for="record-search">' + esc(searchLabel) + '</label><input id="record-search" type="search" class="text-input" data-input="p-browse-query" data-cat="' + category.id + '" value="' + esc(browser.query) + '" maxlength="200" /><div id="individual-records">' + browseListHtml(category.id) + '</div>';
   }
@@ -575,7 +590,7 @@
   }
 
   function exactBrowserHtml() {
-    return '<p class="small muted">Canonical example records only. Original archives, search-box text and local record IDs are not included.</p><label class="field-label" for="exact-search">Search the outgoing records</label><input id="exact-search" type="search" class="text-input" data-input="p-preview-query" value="' + esc(P.ui.previewQuery || '') + '" /><div id="preview-list">' + previewListHtml() + '</div><details><summary>Technical receipt details</summary><dl class="kv"><dt>SHA-256</dt><dd id="hash-value" class="mono">' + esc(P.work.hash || 'Calculating…') + '</dd><dt>Release and round</dt><dd class="mono">' + esc(P.work.releaseId) + ' · ' + esc(P.work.roundId) + '</dd></dl></details>';
+    return '<p class="small muted">Outgoing examples only. No original archive, review-search text or local record IDs.</p><label class="field-label" for="exact-search">Search outgoing records</label><input id="exact-search" type="search" class="text-input" data-input="p-preview-query" value="' + esc(P.ui.previewQuery || '') + '" /><div id="preview-list">' + previewListHtml() + '</div><details class="compact-details"><summary>Technical receipt details</summary><dl class="kv"><dt>SHA-256</dt><dd id="hash-value" class="mono">' + esc(P.work.hash || 'Calculating…') + '</dd><dt>Release and round</dt><dd class="mono">' + esc(P.work.releaseId) + ' · ' + esc(P.work.roundId) + '</dd></dl></details>';
   }
 
   function donationReady() {
@@ -587,14 +602,16 @@
     if (!work) return stepper(3) + privacyStatus() + '<h1>Add your sample to continue</h1><button class="btn btn-primary" data-action="p-go" data-step="upload">Add synthetic file</button>';
     const source = D.sourceById(work.sourceId);
     if (!work.finalized && !work.pendingFinalize) void finalizeWork();
-    let html = stepper(3) + privacyStatus() + '<h1>Your ' + esc(source.displayName) + ' donation is ready</h1><section class="simple-current-file" aria-label="Current file"><p><strong>File:</strong> ' + esc(work.fileName) + '</p><div class="screen-actions"><button type="button" class="btn btn-secondary" data-action="p-change-file" ' + (P.ui.donating ? 'disabled' : '') + '>Change file</button><button type="button" class="btn btn-ghost" data-action="p-go" data-step="sources" ' + (P.ui.donating ? 'disabled' : '') + '>Back to sources</button></div></section><p>Start with all study-requested activity in the synthetic file. Remove individual items if you wish.</p><section id="donation-summary" class="card simple-summary" aria-label="Donation summary">' + summaryHtml() + '</section>';
+    let html = stepper(3) + privacyStatus() + '<h1>Review your ' + esc(source.displayName) + ' sample</h1><p class="lede">Keep the selected records, or remove individual items below.</p><section id="donation-summary" class="card simple-summary" aria-label="Donation summary">' + summaryHtml() + '</section>';
+    html += sensitiveSourceNotice(source.id);
     html += '<details id="individual-review" class="simple-review-disclosure" ' + (P.ui.reviewOpen ? 'open' : '') + '><summary>Review or remove individual items</summary><div id="individual-browser">' + (P.ui.reviewOpen ? individualBrowserHtml() : '') + '</div></details><details id="exact-review" class="simple-review-disclosure" ' + (P.ui.exactOpen ? 'open' : '') + '><summary>View exact data being donated</summary><div id="exact-browser-content">' + (P.ui.exactOpen ? exactBrowserHtml() : '') + '</div></details>';
     html += '<p id="review-feedback" class="small" role="status">' + reviewFeedback() + '</p>';
     if (P.ui.donating) {
       const labels = ['Simulating donation creation…', 'Simulating upload — no bytes leave this page…', 'Simulating verification…', 'Simulation accepted'];
       html += '<p role="status">' + esc(labels[P.ui.donating.stage]) + '</p>';
     }
-    html += '<label class="final-confirmation check-row"><input id="donation-confirm" type="checkbox" data-change="p-confirm" ' + (P.ui.confirmed ? 'checked' : '') + ' ' + (donationReady() ? '' : 'disabled') + ' /><span>I agree to donate the selected records and included information to the research team. <small>This button only simulates a donation in this demo.</small></span></label><div class="screen-actions"><button type="button" class="btn btn-primary" data-action="p-donate" ' + (donationReady() && P.ui.confirmed ? '' : 'disabled') + '>' + (P.ui.donating ? 'Simulating donation…' : 'Confirm and donate') + '</button></div>';
+    html += '<label class="final-confirmation check-row"><input id="donation-confirm" type="checkbox" data-change="p-confirm" ' + (P.ui.confirmed ? 'checked' : '') + ' ' + (donationReady() ? '' : 'disabled') + ' /><span>I agree to donate the selected records and included information to the research team. <small>Demo simulation only.</small></span></label><div class="screen-actions"><button type="button" class="btn btn-primary" data-action="p-donate" ' + (donationReady() && P.ui.confirmed ? '' : 'disabled') + '>' + (P.ui.donating ? 'Simulating donation…' : 'Confirm and donate') + '</button></div>';
+    html += '<section class="simple-current-file" aria-label="Current file"><div class="screen-actions"><button type="button" class="btn btn-secondary" data-action="p-change-file" ' + (P.ui.donating ? 'disabled' : '') + '>Change file</button><button type="button" class="btn btn-ghost" data-action="p-go" data-step="sources" ' + (P.ui.donating ? 'disabled' : '') + '>Back to sources</button></div><details class="compact-details"><summary>Current sample</summary><p>' + esc(work.fileName) + '</p></details></section>';
     return html;
   }
 
@@ -643,21 +660,21 @@
     const missing = requiredMissing();
     let html = miniHeader() + privacyStatus();
     if (!last) return html + '<h1>No donation in this round yet</h1><button class="btn btn-primary" data-action="p-go" data-step="sources">View this round’s sources</button>';
-    html += '<h1>Thank you for your donation</h1><p class="lede">This was a local simulation. No information was sent to a research team.</p><section class="card"><h2>Your example receipt</h2><dl class="receipt-list"><dt>Receipt code</dt><dd>' + esc(last.receiptCode) + '</dd><dt>Source</dt><dd>' + esc(App.sourceName(last.platform)) + '</dd><dt>Records</dt><dd>' + E.formatNumber(last.records) + '</dd><dt>Collection round</dt><dd>' + esc(S.round.name) + '</dd><dt>Fingerprint</dt><dd>' + esc(E.shortHash(last.sha256, 12, 8)) + '</dd></dl></section>';
-    html += missing.length ? '<p class="notice notice-info">Still required this round: ' + esc(missing.map(App.sourceName).join(', ')) + '.</p>' : '<p class="notice notice-success">The required sources for this round are complete. Instagram and Facebook remain optional.</p>';
-    html += '<div class="screen-actions"><button class="btn btn-primary" data-action="p-go" data-step="sources">View this round’s sources</button><button class="btn btn-secondary" data-action="p-go" data-step="join">Study overview and receipts</button><button class="btn btn-ghost" data-action="p-go" data-step="withdraw">Withdrawal options</button></div>';
+    html += '<h1>Sample donation complete</h1><p class="lede">' + esc(App.sourceName(last.platform)) + ' · ' + E.formatNumber(last.records) + ' records · ' + esc(S.round.name) + '</p><section class="card"><h2>Your example receipt</h2><p class="receipt-inline">' + esc(last.receiptCode) + '</p><details class="compact-details"><summary>Receipt details</summary><dl class="receipt-list"><dt>Source</dt><dd>' + esc(App.sourceName(last.platform)) + '</dd><dt>Records</dt><dd>' + E.formatNumber(last.records) + '</dd><dt>Collection round</dt><dd>' + esc(S.round.name) + '</dd><dt>Fingerprint</dt><dd>' + esc(E.shortHash(last.sha256, 12, 8)) + '</dd></dl></details></section>';
+    html += missing.length ? '<p class="notice notice-info">Still required: ' + esc(missing.map(App.sourceName).join(', ')) + '.</p>' : '<p class="notice notice-success">Required sources complete. Other sources are optional.</p>';
+    html += '<div class="screen-actions"><button class="btn btn-primary" data-action="p-go" data-step="sources">Continue to sources</button><button class="btn btn-secondary" data-action="p-go" data-step="join">Overview and receipts</button><button class="btn btn-ghost" data-action="p-go" data-step="withdraw">Withdrawal options</button></div>';
     return html;
   }
 
   function screenWithdraw() {
     let html = miniHeader() + privacyStatus() + '<h1>Withdraw from the study</h1>';
     if (P.withdrawal) {
-      html += '<div class="notice notice-success">' + icon('check-circle') + '<p>Your withdrawal request was received.</p></div><div class="card"><dl class="receipt-list"><dt>Request received</dt><dd>' + esc(E.formatDateTime(P.withdrawal.requestedAt)) + '</dd><dt>Deletion deadline</dt><dd>' + esc(E.formatDate(P.withdrawal.deadlineAt)) + '</dd><dt>SLA</dt><dd>30 business days · ' + esc(project().timezone) + '</dd></dl><p class="small muted" style="margin:0.75rem 0 0">Your access links and sessions were revoked, queued reminders were cancelled, and any pending upload authorization expired. A research administrator will propose the deletion job; a different owner must approve it.</p></div>';
+      html += '<div class="notice notice-success">' + icon('check-circle') + '<p>Example request received. Participant access ended.</p></div><div class="card"><dl class="receipt-list"><dt>Request received</dt><dd>' + esc(E.formatDateTime(P.withdrawal.requestedAt)) + '</dd><dt>Deletion deadline</dt><dd>' + esc(E.formatDate(P.withdrawal.deadlineAt)) + '</dd></dl><details class="compact-details"><summary>What happens next</summary><p>Example deadline: 30 business days · ' + esc(project().timezone) + '.</p><p>Your access links and sessions were revoked, queued reminders were cancelled, and any pending upload authorization expired. A research administrator proposes deletion; a different owner must approve it.</p></details></div>';
       html += '<div class="screen-actions"><button type="button" class="btn btn-secondary" data-action="p-go" data-step="join">Return to study overview</button></div>';
       return html;
     }
-    html += '<p class="lede">You may withdraw during the identifiable active data-collection period. Submitting your request immediately ends participant access.</p>';
-    html += '<div class="notice notice-warn">' + icon('warning-circle') + '<p>Submitting immediately ends participant access, revokes active links and sessions, and clears saved donation progress. You do not need to provide a reason.</p></div>';
+    html += '<p class="lede">Try a withdrawal during the identifiable active collection period.</p>';
+    html += '<div class="notice notice-warn">' + icon('warning-circle') + '<p>This ends example access, revokes links and sessions, and clears saved progress. No reason is needed.</p></div>';
     html += '<div class="card"><label class="field-label" for="wd-reason">Reason (optional)</label><textarea class="text-input" id="wd-reason" rows="3" placeholder="You can leave this blank."></textarea></div>';
     html += '<div class="screen-actions"><button type="button" class="btn btn-danger" data-action="p-withdraw">Request withdrawal</button><button type="button" class="btn btn-ghost" data-action="p-go" data-step="' + (P.donations.length ? 'done' : 'join') + '">Cancel</button></div>';
     return html;
@@ -697,7 +714,7 @@
     const notes = NOTES[P.step];
     const notesEl = document.getElementById('tour-notes');
     if (notesEl && notes) {
-      notesEl.innerHTML = '<span class="eyebrow">What is happening</span><h2>' + icon('info', 'ico-sm') + esc(notes.title) + '</h2><ul>' + notes.bullets.map((b) => '<li>' + esc(b) + '</li>').join('') + '</ul><details class="where" style="border:0;padding:0;background:transparent;margin:0"><summary style="padding:0.25rem 0;font-size:var(--font-size-xs);color:var(--color-text-muted)">For technical readers</summary><code>' + esc(notes.where) + '</code></details>';
+      notesEl.innerHTML = '<details class="tour-context compact-details"><summary>How this step works</summary><h2>' + icon('info', 'ico-sm') + esc(notes.title) + '</h2><ul>' + notes.bullets.map((b) => '<li>' + esc(b) + '</li>').join('') + '</ul><details class="where compact-details"><summary>Technical details</summary><code>' + esc(notes.where) + '</code></details></details>';
     }
     if (P.step === 'consent' && (!P.consent.agreed || consentStale())) {
       const doc = document.getElementById('consent-doc');
@@ -714,7 +731,7 @@
       const status = document.getElementById('consent-status');
       if (status) {
         status.className = 'consent-status is-done';
-        status.innerHTML = icon('check-circle', 'ico-sm') + ' Complete consent reviewed. You may continue with the consent requirements.';
+        status.innerHTML = icon('check-circle', 'ico-sm') + ' Full consent reviewed.';
       }
       updateConsentButton();
     }

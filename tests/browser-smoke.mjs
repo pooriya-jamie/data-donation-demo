@@ -144,6 +144,7 @@ async function reviewInteractions() {
   await page.locator('[data-action="p-add-sample"]').click();
   await page.locator('[data-dlg="cancel"]').click();
   assert.deepEqual(await selection(), beforeReplace, 'Canceling replacement preserves the original');
+  await page.getByText('Test a failed replacement', { exact: true }).click();
   await page.locator('[data-action="p-invalid-sample"]').click();
   await page.locator('[data-dlg="confirm"]').click();
   await page.waitForFunction(() => App.S.participant.ui.fileError && !App.S.participant.processing);
@@ -225,6 +226,47 @@ async function publicationGuards() {
   assert.equal(await page.locator('[data-action="p-add-sample"]').count(), 0, 'Disabled sources cannot open a sample via deep link');
   console.log('Release, re-consent, stale work, and disabled-source guards checked.');
 }
+async function conciseTourChecks() {
+  await boot();
+  await route('overview');
+  const privacy = page.getByText('How it works & privacy', { exact: true });
+  const privacyDetails = privacy.locator('..');
+  assert.equal(await privacyDetails.evaluate(el => el.open), false);
+  await privacy.focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await privacyDetails.evaluate(el => el.open), true, 'Details can be opened by keyboard');
+  await page.keyboard.press('Space');
+  assert.equal(await privacyDetails.evaluate(el => el.open), false, 'Details can be closed by keyboard');
+  await page.getByText('Exactly what this study collects', { exact: true }).click();
+  const fb = page.locator('[data-action="ceiling-source"][data-source="facebook"]');
+  if (await fb.count()) await fb.click();
+  await noOverflow();
+
+  await route('server');
+  await page.locator('.pipeline-steps li').first().waitFor();
+  assert.equal(await page.locator('.pipeline-steps li').count(), 4);
+  for (const scenario of ['normal', 'tampered', 'suspended']) {
+    await page.locator('[data-change="seq-scenario"]').selectOption(scenario);
+    await page.locator('[data-action="seq-play"]').click();
+    await page.waitForFunction(() => App.S.server.finished || App.S.server.paused);
+    const result = await page.evaluate(() => ({ status: App.S.server.status, paused: App.S.server.paused }));
+    assert.equal(result.status, scenario === 'normal' ? 'accepted' : scenario === 'tampered' ? 'failed' : 'uploaded');
+    if (scenario === 'suspended') assert.equal(result.paused, true);
+  }
+  await page.getByText('See all 11 server steps', { exact: true }).click();
+  await page.locator('#seq-figure svg').waitFor();
+  await noOverflow();
+  await page.setViewportSize({ width: 320, height: 844 });
+  await noOverflow();
+  for (const view of ['overview', 'architecture']) {
+    await route(view);
+    await page.locator('#view-' + view + ' .tour-details').evaluateAll(nodes => nodes.forEach(node => { node.open = true; }));
+    await noOverflow();
+    await screenshot(view + '-expanded-320');
+  }
+  await page.setViewportSize({ width: 1280, height: 900 });
+  console.log('Concise disclosures, keyboard controls, and all three server scenarios checked.');
+}
 try {
   await boot();
   console.log('Demo loaded.');
@@ -261,6 +303,7 @@ try {
   await screenshot('sources-desktop');
   await page.setViewportSize({ width: 320, height: 844 });
   await noOverflow();
+  assert.equal(await page.locator('.simple-source .tile-body').evaluateAll(nodes => nodes.every(el => el.getBoundingClientRect().width >= 130)), true, 'Mobile source descriptions must not be squeezed beside buttons');
   await screenshot('sources-320');
   const historicalCount = await page.evaluate(() => App.S.participant.donations.filter(d => d.roundKey !== App.S.round.roundKey).length);
   assert.ok(historicalCount > 0, 'Seeded earlier-round history demonstrates repeat donation');
@@ -305,6 +348,7 @@ try {
   assert.match(await page.locator('.admin-table').innerText(), /Round 2/);
   assert.doesNotMatch(await page.locator('.admin-table').innerText(), /Initial collection/);
   await publicationGuards();
+  await conciseTourChecks();
   assert.deepEqual(requests, [], 'No external network requests are permitted');
   assert.deepEqual(errors, [], 'No browser runtime errors');
   console.log('Demo consent, four-source donation, repeat-round history, responsive and offline-isolation checks passed.');

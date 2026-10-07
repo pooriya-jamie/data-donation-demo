@@ -128,7 +128,7 @@
     mount.innerHTML = CEILING_SOURCES.map((id) => D.sourceById(id)).map((source) => {
       const policy = App.releasePolicyFor(source.id);
       const suspended = App.sourceSuspended(source.id);
-      const status = suspended ? 'paused' : source.capabilityStatus === 'donation_ready' ? 'ready' : source.capabilityStatus === 'instructions_only' ? 'guide only' : 'not yet';
+      const status = suspended ? 'paused' : !policy || !['donation', 'guide_only'].includes(policy.mode) ? 'not used' : policy.mode === 'guide_only' || source.capabilityStatus === 'instructions_only' ? 'guide only' : source.capabilityStatus === 'donation_ready' ? (required.includes(source.id) ? 'required' : 'optional') : 'not yet';
       const toneClass = suspended ? 'admin-status-danger' : source.capabilityStatus === 'donation_ready' ? 'admin-status-positive' : source.capabilityStatus === 'instructions_only' ? 'admin-status-warning' : '';
       const projectLine =
         policy && policy.mode === 'donation'
@@ -138,8 +138,7 @@
             : 'Not used in this study';
       return (
         '<div class="source-pill"><span class="source-icon' + (source.enabled ? '' : ' is-muted') + '">' + esc(source.letter) + '</span>' +
-        '<span><strong>' + esc(source.displayName) + '</strong><span class="admin-status ' + toneClass + '">' + esc(status) + '</span>' +
-        '<span class="xs muted" style="display:block">' + esc(projectLine) + '</span></span></div>'
+        '<span title="' + esc(projectLine) + '"><strong>' + esc(source.displayName) + '</strong><span class="admin-status ' + toneClass + '">' + esc(status) + '</span></span></div>'
       );
     }).join('');
   }
@@ -305,8 +304,6 @@
     const r = S.round.id;
     const final = S.server.status === 'accepted';
     mount.innerHTML =
-      '<span class="eyebrow">' + (d.seeded ? 'A synthetic sample donation' : 'Your simulated participant donation') + '</span>' +
-      '<h2 style="font-size:1.05rem">' + esc(App.sourceName(d.platform)) + ' · ' + E.formatNumber(d.records) + ' records · ' + E.formatBytes(d.payloadBytes) + '</h2>' +
       '<dl class="kv">' +
       '<dt>Fingerprint</dt><dd class="mono">' + esc(E.shortHash(d.sha256, 16, 8)) + '</dd>' +
       '<dt>Study version</dt><dd>v' + esc(String((S.releases.find((x) => x.id === d.releaseId) || {}).version || '')) + '</dd>' +
@@ -316,8 +313,47 @@
       '<div class="key-transition" aria-label="Where the file is stored">' +
       '<span>Temporary slot <span class="muted">· deleted after 15 minutes or once accepted</span></span>' +
       '<span class="' + (final ? 'is-final' : '') + '">Permanent locked copy <span class="muted">· filed under study ' + p.slice(0, 10) + '…, round ' + esc(r) + '</span></span>' +
-      '</div>' +
-      '<p class="xs muted" style="margin:0.75rem 0 0">Offline simulation only: no upload, encrypted storage or real receipt is created.' + (d.seeded ? ' Try the participant section to replay your synthetic selection here.' : '') + '</p>';
+      '</div>';
+    const summary = document.getElementById('seq-summary');
+    if (summary) summary.innerHTML =
+      '<span class="eyebrow">' + (d.seeded ? 'Synthetic sample' : 'Your simulated selection') + '</span>' +
+      '<h2>' + esc(App.sourceName(d.platform)) + '</h2>' +
+      '<p class="pipeline-metric"><strong>' + E.formatNumber(d.records) + '</strong> records <span class="muted">· ' + E.formatBytes(d.payloadBytes) + '</span></p>' +
+      (final ? '<p class="small">Demo receipt <code>' + esc(d.receiptCode) + '</code></p>' : '<p class="small muted">Receipt appears after acceptance.</p>');
+  }
+
+  function renderPipeline() {
+    const mount = document.getElementById('seq-overview');
+    if (!mount || !cachedSteps) return;
+    const sv = S.server;
+    const phases = [
+      { label: 'Request', icon: 'file-up', first: 0, last: 2 },
+      { label: 'Upload', icon: 'cloud', first: 3, last: 4 },
+      { label: 'Verify', icon: 'shield-check', first: 5, last: 7 },
+      { label: 'Accept', icon: 'receipt', first: 8, last: 10 },
+    ];
+    const step = cachedSteps[sv.stepIndex];
+    let title = step ? step.label : 'Ready when you are';
+    let note = step ? step.sub : 'Press Play, or advance one step at a time.';
+    if (sv.finished && sv.scenario === 'tampered') {
+      title = 'File changed — donation rejected';
+      note = 'The fingerprint does not match. The temporary upload is deleted.';
+    } else if (sv.paused) {
+      title = 'Service paused — waiting';
+      note = 'Nothing is accepted. Completion can be retried when the service returns.';
+    } else if (sv.finished) {
+      title = 'Accepted · demo receipt ready';
+      note = 'The reviewed donation passed all simulated checks.';
+    }
+    mount.innerHTML = '<ol class="pipeline-steps" aria-label="Donation stages">' + phases.map((phase) => {
+      const failed = sv.failedAt !== null && sv.failedAt >= phase.first && sv.failedAt <= phase.last;
+      const done = sv.stepIndex > phase.last || (sv.stepIndex === phase.last && !failed);
+      const active = sv.stepIndex >= phase.first && sv.stepIndex <= phase.last && !done;
+      const cls = failed ? 'is-failed' : done ? 'is-done' : active ? 'is-active' : '';
+      const state = failed ? (sv.paused ? 'paused' : 'failed') : done ? 'complete' : active ? 'in progress' : 'not started';
+      return '<li class="' + cls + '" aria-label="' + phase.label + ': ' + state + '"><span class="pipeline-stage-icon">' + icon(done ? 'check' : phase.icon) + '</span><strong>' + phase.label + '</strong></li>';
+    }).join('') + '</ol>' +
+      '<div class="pipeline-current"><span class="eyebrow">' + (step ? 'Step ' + (sv.stepIndex + 1) + ' of ' + cachedSteps.length : 'Simulated workflow') + '</span><h2>' + esc(title) + '</h2><p>' + esc(note) + '</p></div>';
   }
 
   function renderControls() {
@@ -329,10 +365,10 @@
       '<button type="button" class="btn btn-primary btn-sm" data-action="seq-play" ' + (sv.playing || sv.finished ? 'disabled' : '') + '>' + icon('play', 'ico-sm') + ' Play</button>' +
       '<button type="button" class="btn btn-secondary btn-sm" data-action="seq-step" ' + (sv.playing || sv.finished ? 'disabled' : '') + '>' + icon('skip', 'ico-sm') + ' Step</button>' +
       '<button type="button" class="btn btn-ghost btn-sm" data-action="seq-reset">' + icon('reset', 'ico-sm') + ' Reset</button>' +
-      '<label>What if… <select class="select-input" data-change="seq-scenario" ' + (sv.playing ? 'disabled' : '') + '>' +
-      '<option value="normal"' + (sv.scenario === 'normal' ? ' selected' : '') + '>Everything goes normally</option>' +
-      '<option value="suspended"' + (sv.scenario === 'suspended' ? ' selected' : '') + '>Staff pause the service mid-upload</option>' +
-      '<option value="tampered"' + (sv.scenario === 'tampered' ? ' selected' : '') + '>The file changes on the way</option>' +
+      '<label>Scenario <select class="select-input" data-change="seq-scenario" ' + (sv.playing ? 'disabled' : '') + '>' +
+      '<option value="normal"' + (sv.scenario === 'normal' ? ' selected' : '') + '>Normal donation</option>' +
+      '<option value="suspended"' + (sv.scenario === 'suspended' ? ' selected' : '') + '>Service paused</option>' +
+      '<option value="tampered"' + (sv.scenario === 'tampered' ? ' selected' : '') + '>File changed</option>' +
       '</select></label>' +
       '<span class="status-chip is-' + esc(status.replace(/\s/g, '_')) + '" aria-live="polite">' + esc(status === 'awaiting_upload' ? 'waiting for upload' : status === 'uploaded' ? (sv.paused ? 'uploaded · waiting for the service' : 'uploaded, being checked') : status === 'accepted' ? 'accepted' : status === 'failed' ? 'rejected' : 'not started') + '</span>';
   }
@@ -358,6 +394,7 @@
     renderControls();
     renderChecks();
     renderFacts(d);
+    renderPipeline();
     renderLog();
   }
 
@@ -410,6 +447,7 @@
     renderControls();
     renderChecks();
     renderFacts(S.server.donation || S.server.fallback);
+    renderPipeline();
     renderLog();
   }
 

@@ -1501,9 +1501,13 @@ dialog.dialog::backdrop {
 
 .journey-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
   align-items: start;
+}
+
+#view-participant .view-inner {
+  max-width: 1050px;
 }
 
 .device {
@@ -1596,7 +1600,7 @@ dialog.dialog::backdrop {
 }
 .simple-count {
   font-size: 1.1rem;
-  min-height: 5em;
+  min-height: 3em;
 }
 .simple-count > strong {
   font-size: 1.65rem;
@@ -1605,10 +1609,11 @@ dialog.dialog::backdrop {
   display: block;
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-  min-height: 3em;
+  min-height: 1.5em;
 }
 .simple-update {
-  min-height: 3em;
+  min-height: 1.5em;
+  margin-block: 0.5rem;
 }
 .simple-fields > div {
   margin-block: 0.85rem;
@@ -1792,8 +1797,11 @@ dialog.dialog::backdrop {
 }
 
 .tour-notes {
-  position: sticky;
-  top: calc(var(--topbar-h) + 1rem);
+  position: static;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
 }
 
 .tour-notes h2 {
@@ -3006,7 +3014,7 @@ fieldset.question.is-wrong {
 
 .server-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
   align-items: start;
 }
@@ -4446,6 +4454,185 @@ fieldset.question.is-wrong {
 
   .screen-actions .btn {
     width: 100%;
+  }
+}
+
+/* Concise tour: keep actions visible and secondary reading on demand. */
+.tour-details,
+.tour-context,
+.compact-details,
+.demo-details {
+  min-width: 0;
+  margin-block: 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow-wrap: anywhere;
+}
+
+.tour-details > summary,
+.tour-context > summary,
+.compact-details > summary,
+.demo-details > summary {
+  min-height: 44px;
+  padding: 0.85rem 1rem;
+  color: var(--color-text);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.tour-details[open] > summary,
+.tour-context[open] > summary,
+.compact-details[open] > summary,
+.demo-details[open] > summary {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tour-details > :not(summary),
+.tour-context > :not(summary),
+.compact-details > :not(summary),
+.demo-details-body {
+  margin: 0;
+  padding: 1rem;
+  min-width: 0;
+}
+
+.demo-details-body > :last-child,
+.compact-details > div > :last-child {
+  margin-bottom: 0;
+}
+
+.admin-table .demo-details {
+  margin: 0.3rem 0;
+  max-width: 42rem;
+}
+
+.pipeline-steps,
+.data-flow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  padding: 0;
+  margin: 1rem 0;
+  list-style: none;
+}
+
+.data-flow {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pipeline-steps > li,
+.data-flow-card {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.2rem;
+  background: var(--color-surface);
+}
+
+.pipeline-steps strong,
+.pipeline-steps span,
+.data-flow-card strong {
+  display: block;
+}
+
+.pipeline-steps span,
+.data-flow-card p {
+  margin: 0.4rem 0 0;
+  color: var(--color-text-secondary);
+}
+
+.pipeline-steps .is-active {
+  border-color: var(--color-action);
+  background: var(--color-surface-tint);
+  box-shadow: inset 0 3px 0 var(--color-action);
+}
+
+.pipeline-steps .is-done {
+  border-color: var(--color-success-border);
+  background: var(--color-success-soft);
+}
+
+.pipeline-steps .is-failed {
+  border-color: var(--color-danger-border);
+  background: var(--color-danger-soft);
+}
+
+.pipeline-current {
+  min-height: 3rem;
+  padding: 0.85rem 1rem;
+  background: var(--color-surface-tint);
+  border-radius: var(--radius-md);
+}
+
+.tour-next {
+  margin-top: 1.5rem;
+}
+
+.demo-note,
+.privacy-note {
+  margin-block: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+#view-overview .sources-strip {
+  margin-top: 1.2rem;
+}
+
+.pipeline-stage-icon {
+  color: var(--color-action);
+  margin-bottom: 0.4rem;
+}
+
+.pipeline-current h2 {
+  margin-block: 0.35rem;
+}
+
+.pipeline-current p {
+  margin-bottom: 0;
+}
+
+.pipeline-metric strong {
+  font-size: 1.45rem;
+}
+
+/* Current cards have no legacy checkbox column. Keep scope text readable. */
+.platform-tile.simple-source {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  cursor: default;
+}
+
+.simple-source .tile-badge {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0.35rem;
+}
+
+.simple-source > .btn {
+  align-self: center;
+}
+
+@media (max-width: 620px) {
+  .platform-tile.simple-source {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .platform-tile.simple-source > .btn {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .platform-tile.simple-source > .tile-badge {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 720px) {
+  .pipeline-steps,
+  .data-flow {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
