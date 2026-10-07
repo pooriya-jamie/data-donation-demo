@@ -278,8 +278,8 @@ try {
   }));
   assert.equal(config.name, 'Social Media Data Donation');
   assert.deepEqual(config.enabled, ['facebook', 'instagram', 'tiktok', 'youtube']);
-  assert.deepEqual(config.required, ['tiktok', 'youtube']);
-  assert.equal(config.version, 3);
+  assert.deepEqual(config.required, ['facebook', 'instagram', 'tiktok', 'youtube']);
+  assert.equal(config.version, 4);
   for (const view of ['overview', 'participant', 'server', 'admin', 'architecture']) {
     await route(view);
     await noOverflow();
@@ -289,6 +289,10 @@ try {
   const initialParticipant = await page.locator('.admin-table tbody tr').filter({ hasText: 'P-0417' }).innerText();
   assert.match(initialParticipant, /1\.0/);
   assert.match(initialParticipant, /re-consent required/i);
+  const earlierComplete = page.locator('.admin-table tbody tr').filter({ hasText: 'P-0423' });
+  assert.equal((await earlierComplete.locator('td').nth(4).innerText()).toLowerCase(), 'complete', 'Earlier-round progress remains unchanged');
+  assert.equal((await earlierComplete.locator('td').nth(5).innerText()).toLowerCase(), 'partial', 'TikTok/YouTube-only Round 2 participant still needs Meta sources');
+  assert.match(await earlierComplete.innerText(), /re-consent required/i, 'New requirements require fresh consent');
   // Exercise the normal consent screen, not real participant credentials.
   await route('participant/consent');
   await page.locator('#consent-doc').evaluate(el => {
@@ -300,6 +304,7 @@ try {
   await page.locator('[data-action="p-consent-agree"]').click();
   await page.waitForFunction(() => App.S.participant.step === 'sources');
   await readyParticipant();
+  assert.equal(await page.locator('.simple-source .tile-badge.required').count(), 4, 'All four sources are labeled required');
   await screenshot('sources-desktop');
   await page.setViewportSize({ width: 320, height: 844 });
   await noOverflow();
@@ -325,6 +330,21 @@ try {
     await page.waitForFunction(() => App.S.participant.step === 'done');
     const accepted = await page.evaluate(source => App.S.participant.donations.filter(d => d.roundKey === App.S.round.roundKey && d.status === 'accepted' && d.platform === source).length, source);
     assert.equal(accepted, 1, 'One accepted simulated donation per source and round');
+    const progress = await page.evaluate(() => ({
+      complete: App.S.server.donation.roundComplete,
+      status: App.S.admin.participants.find(person => person.id === App.S.participant.id).rounds[App.S.round.roundKey],
+    }));
+    assert.equal(progress.complete, source === 'facebook', 'Round completes only after all four accepted donations');
+    assert.equal(progress.status, source === 'facebook' ? 'complete' : 'partial');
+    if (source === 'youtube') {
+      assert.match(await page.locator('.notice-info').innerText(), /Still required: Instagram, Facebook/);
+    }
+    if (source === 'instagram') {
+      assert.match(await page.locator('.notice-info').innerText(), /Still required: Facebook/);
+    }
+    if (source === 'facebook') {
+      assert.match(await page.locator('.notice-success').innerText(), /All required sources complete/);
+    }
     await noOverflow();
   }
   assert.equal(await page.evaluate(() => App.S.participant.donations.filter(d => d.roundKey !== App.S.round.roundKey).length), historicalCount);

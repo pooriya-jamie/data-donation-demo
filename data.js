@@ -488,7 +488,7 @@ window.DEMO_DATA = (function () {
       lifecycle: 'active',
       visibility: 'unlisted',
       timezone: 'America/Los_Angeles',
-      activeReleaseId: 'rel_v3',
+      activeReleaseId: 'rel_v4',
       participantReviewMode: 'record_exclusions_only',
       coordinatorEmail: 'coordinator@demo.invalid',
       estimatedMinutes: 20,
@@ -499,7 +499,7 @@ window.DEMO_DATA = (function () {
       retention: { anchor: 'round_close', days: 365 },
       deletion: { slaDays: 30, slaUnit: 'business_days' },
       createdAt: '2026-01-14T18:12:00Z',
-      updatedAt: '2026-10-07T18:00:00Z',
+      updatedAt: '2026-10-07T19:00:00Z',
     },
     {
       id: 'prj_b7c209',
@@ -581,7 +581,15 @@ window.DEMO_DATA = (function () {
         fields: category.fields.map((id) => fieldPolicy(id, 'mandatory', true)) })) };
   });
 
-  const PARTICIPANT_SCOPE_NOTICE = 'Demo of the current study scope: TikTok and YouTube are required for Round 2; Instagram and Facebook are optional. All approved available fields and all dates are included. Remove individual records before explicitly confirming. Instagram includes watched-video dates and links. Facebook includes dates and links for posts/videos shown in the feed, plus main search dates and exact search words. Shown in the feed does not mean watched or read. Group links and search words may reveal sensitive information. Missing values remain absent; no data are inferred. Participation is unpaid. This demo generates only synthetic data locally and sends nothing.';
+  // Requirements belong to Round 2, not to the project-wide source policies.
+  const V4_SOURCE_POLICIES = JSON.parse(JSON.stringify(V3_SOURCE_POLICIES));
+
+  // Keep the earlier published notice intact in the release history.
+  const V3_PARTICIPANT_SCOPE_NOTICE = 'Demo of the current study scope: TikTok and YouTube are required for Round 2; Instagram and Facebook are optional. All approved available fields and all dates are included. Remove individual records before explicitly confirming. Instagram includes watched-video dates and links. Facebook includes dates and links for posts/videos shown in the feed, plus main search dates and exact search words. Shown in the feed does not mean watched or read. Group links and search words may reveal sensitive information. Missing values remain absent; no data are inferred. Participation is unpaid. This demo generates only synthetic data locally and sends nothing.';
+  const PARTICIPANT_SCOPE_NOTICE = V3_PARTICIPANT_SCOPE_NOTICE.replace(
+    'TikTok and YouTube are required for Round 2; Instagram and Facebook are optional.',
+    'TikTok, YouTube, Instagram and Facebook are all required for Round 2.',
+  );
 
   const RELEASES = [
     {
@@ -630,16 +638,28 @@ window.DEMO_DATA = (function () {
       ],
     },
     {
-      id: 'rel_v3', projectId: 'prj_a4f1e2', version: 3, status: 'active',
+      id: 'rel_v3', projectId: 'prj_a4f1e2', version: 3, status: 'superseded',
       publishedAt: '2026-10-07T18:00:00Z', publishedBy: 'demo.owner',
       supersedesReleaseId: 'rel_v2', requiresReconsent: true, consentVersion: '3.0-demo',
-      participantReviewMode: 'record_exclusions_only', participantDataScopeNotice: PARTICIPANT_SCOPE_NOTICE,
+      participantReviewMode: 'record_exclusions_only', participantDataScopeNotice: V3_PARTICIPANT_SCOPE_NOTICE,
       sourcePolicies: V3_SOURCE_POLICIES,
       material: { consentVersion: '3.0-demo', compensation: { mode: 'none', amountCents: 0, currency: 'USD' }, retention: { anchor: 'round_close', days: 365 }, deletion: { slaDays: 30, slaUnit: 'business_days' } },
       changes: [
         { section: 'Optional sources', summary: 'Instagram watched-video dates/links and Facebook feed-shown dates/links plus main search dates/words added to the same Round 2.', material: true },
         { section: 'Privacy disclosure', summary: 'Facebook shown-in-feed is not watching. Search words and supplied group links can be sensitive.', material: true },
         { section: 'Preserved requirements', summary: 'TikTok and YouTube remain required. Earlier accepted donations are preserved; optional Meta sources do not create a new round.', material: false },
+      ],
+    },
+    {
+      id: 'rel_v4', projectId: 'prj_a4f1e2', version: 4, status: 'active',
+      publishedAt: '2026-10-07T19:00:00Z', publishedBy: 'demo.owner',
+      supersedesReleaseId: 'rel_v3', requiresReconsent: true, consentVersion: '4.0-demo',
+      participantReviewMode: 'record_exclusions_only', participantDataScopeNotice: PARTICIPANT_SCOPE_NOTICE,
+      sourcePolicies: V4_SOURCE_POLICIES,
+      material: { consentVersion: '4.0-demo', compensation: { mode: 'none', amountCents: 0, currency: 'USD' }, retention: { anchor: 'round_close', days: 365 }, deletion: { slaDays: 30, slaUnit: 'business_days' } },
+      changes: [
+        { section: 'Required sources', summary: 'TikTok, YouTube, Instagram and Facebook are all required in the existing Round 2.', material: true },
+        { section: 'Preserved history', summary: 'Earlier releases, consent and accepted donations stay unchanged. Earlier-round requirements are preserved.', material: false },
       ],
     },
   ];
@@ -663,15 +683,15 @@ window.DEMO_DATA = (function () {
       id: 'rnd_w2',
       roundKey: 'data-donation-round-2',
       name: 'Round 2',
-      projectReleaseId: 'rel_v3',
+      projectReleaseId: 'rel_v4',
       status: 'active',
       startsAt: '2026-09-01',
       donationsCloseAt: '2026-12-15',
       participantAccessEndsAt: '2027-01-15',
-      requiredSourceIds: ['tiktok', 'youtube'],
+      requiredSourceIds: ['tiktok', 'youtube', 'instagram', 'facebook'],
       eligibilityMode: 'all_active_participants',
-      completed: 3,
-      partial: 4,
+      completed: 0,
+      partial: 7,
       accepted: 11,
     },
   ];
@@ -682,16 +702,16 @@ window.DEMO_DATA = (function () {
 
   const PARTICIPANTS = [
     { id: 'P-0417', status: 'active', invitedAt: '2026-03-02', consentVersion: '1.0', consentReleaseId: 'rel_v1', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'none' }, contact: 'not collected in demo', note: 'Synthetic tour participant' },
-    { id: 'P-0418', status: 'active', invitedAt: '2026-09-02', consentVersion: '3.0-demo', consentReleaseId: 'rel_v3', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'complete' } },
+    { id: 'P-0418', status: 'active', invitedAt: '2026-09-02', consentVersion: '3.0-demo', consentReleaseId: 'rel_v3', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'partial' } },
     { id: 'P-0419', status: 'active', invitedAt: '2026-09-02', consentVersion: '2.0', consentReleaseId: 'rel_v2', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'partial' } },
     { id: 'P-0420', status: 'invited', invitedAt: '2026-09-03', consentVersion: null, consentReleaseId: null, rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'none' } },
     { id: 'P-0421', status: 'withdrawn', invitedAt: '2026-03-04', consentVersion: '1.0', consentReleaseId: 'rel_v1', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'none' } },
     { id: 'P-0422', status: 'active', invitedAt: '2026-03-04', consentVersion: '3.0-demo', consentReleaseId: 'rel_v3', rounds: { 'initial-collection': 'partial', 'data-donation-round-2': 'partial' } },
-    { id: 'P-0423', status: 'active', invitedAt: '2026-03-05', consentVersion: '3.0-demo', consentReleaseId: 'rel_v3', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'complete' } },
+    { id: 'P-0423', status: 'active', invitedAt: '2026-03-05', consentVersion: '3.0-demo', consentReleaseId: 'rel_v3', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'partial' } },
     { id: 'P-0424', status: 'active', invitedAt: '2026-09-04', consentVersion: '2.0', consentReleaseId: 'rel_v2', rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'partial' } },
     { id: 'P-0425', status: 'invited', invitedAt: '2026-09-08', consentVersion: null, consentReleaseId: null, rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'none' } },
     { id: 'P-0426', status: 'active', invitedAt: '2026-03-06', consentVersion: '1.0', consentReleaseId: 'rel_v1', rounds: { 'initial-collection': 'complete', 'data-donation-round-2': 'none' }, note: 'Synthetic re-consent example' },
-    { id: 'P-0427', status: 'active', invitedAt: '2026-09-09', consentVersion: '2.0', consentReleaseId: 'rel_v2', rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'complete' } },
+    { id: 'P-0427', status: 'active', invitedAt: '2026-09-09', consentVersion: '2.0', consentReleaseId: 'rel_v2', rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'partial' } },
     { id: 'P-0428', status: 'active', invitedAt: '2026-09-10', consentVersion: '2.0', consentReleaseId: 'rel_v2', rounds: { 'initial-collection': 'none', 'data-donation-round-2': 'partial' } },
   ];
 
@@ -737,6 +757,7 @@ window.DEMO_DATA = (function () {
   ];
 
   const AUDIT_EVENTS = [
+    { at: '2026-10-07T19:00:00Z', action: 'release.published', actor: 'admin demo.owner', subject: 'rel_v4', summary: 'Simulated release v4: all four sources required in Round 2; earlier releases, consent, donations and earlier-round requirements preserved.' },
     { at: '2026-10-07T18:00:00Z', action: 'release.published', actor: 'admin demo.owner', subject: 'rel_v3', summary: 'Simulated release v3: optional Instagram/Facebook added within Round 2; TikTok/YouTube requirements and earlier donations preserved.' },
     { at: '2026-09-19T09:00:00Z', action: 'backup.completed', actor: 'system', subject: 'backup_runs/bkp_0919', summary: 'Nightly PostgreSQL backup verified (SSE-KMS).' },
     { at: '2026-09-18T16:47:00Z', action: 'donation.created', actor: 'participant P-0419', subject: 'don_c3e5…c3d5', summary: 'YouTube donation attempt created; staging authorization issued (15 min).' },
@@ -776,26 +797,26 @@ window.DEMO_DATA = (function () {
   /* ------------------------------------------------------------------ */
 
   const CONSENT = {
-    version: '3.0-demo',
+    version: '4.0-demo',
     requireScroll: true,
     requireSignature: true,
     summary: {
       purpose:
         'Try a local-only demonstration of the Social Media Data Donation workflow. The study name and approved data scope mirror the application, but this tour does not enroll you in research. All activity and participant examples are fictional.',
       whatYouShare:
-        'TikTok watched-video dates and links; YouTube watched-video dates, links, titles and channel names, plus viewed-post dates, links and titles. Optional Instagram includes watched-video dates and links. Optional Facebook includes feed-shown post/video dates and links, and main-search dates and exact query words. Only available values are included.',
+        'TikTok watched-video dates and links; YouTube watched-video dates, links, titles and channel names, plus viewed-post dates, links and titles. Instagram includes watched-video dates and links. Facebook includes feed-shown post/video dates and links, and main-search dates and exact query words. Only available values are included.',
       risks:
         'In real exports, links and search words can reveal sensitive interests. Facebook links may identify group or private content; “shown in feed” does not prove it was read or watched. Here, every example is synthetic and no payload is sent to a server.',
       voluntary:
-        'This is an unpaid demo. TikTok and YouTube are the required sources in the simulated Round 2; Instagram and Facebook are optional. You can leave the tour at any time. Use a made-up name for the demonstration acknowledgment.',
+        'This is an unpaid demo. TikTok, YouTube, Instagram and Facebook are all required in the simulated Round 2. You can leave the tour at any time. Use a made-up name for the demonstration acknowledgment.',
       withdrawal:
         'Withdrawal and deletion screens only illustrate the workflow. They do not submit requests or delete real study records. Restarting the tour clears its temporary page state; displayed timelines are synthetic examples, not a service promise.',
     },
     paragraphs: [
       'This is a fictional acknowledgment for an offline visual tour, not a legal consent form or research enrollment. Do not enter your real name, contact information, participant link, or export files. Use only the synthetic examples supplied by the demo.',
-      'The simulated project is Social Media Data Donation, release v3, Round 2. TikTok and YouTube are required for completion of that round. Instagram and Facebook are optional. Earlier TikTok and YouTube donations remain visible as history and do not complete the current round.',
+      'The simulated project is Social Media Data Donation, release v4, Round 2. TikTok, YouTube, Instagram and Facebook are all required for completion of that round. Earlier-round donations remain visible as history and do not complete the current round.',
       'TikTok includes watched-video dates and links. YouTube includes watched-video dates, links, titles and channel names, plus viewed-post dates, links and titles. TikTok likes and searches, YouTube searches, and ChatGPT conversations are not part of this study.',
-      'Optional Instagram includes dates and post or Reel links from its watched-video history. Optional Facebook includes dates and links for posts and videos recorded as shown in the feed, plus dates and exact query words from main Facebook searches. Marketplace searches, author descriptions, private account identifiers, messages, and unrelated export sections are not included.',
+      'Instagram includes dates and post or Reel links from its watched-video history. Facebook includes dates and links for posts and videos recorded as shown in the feed, plus dates and exact query words from main Facebook searches. Marketplace searches, author descriptions, private account identifiers, messages, and unrelated export sections are not included.',
       'Shown in a Facebook feed is not a measurement of reading or watching. Links can identify group or private posts and search queries can contain sensitive words. Review the exact records before confirming. A link is not a promise that content is publicly accessible.',
       'All available dates and all approved available fields are included. Missing values remain absent; the application does not infer them. You may remove or restore individual records. Date, category, field, and bulk-removal controls are not offered for this study. The date range shown in a preview describes the supplied sample, not completeness of platform history.',
       'The real application processes an original export locally and prepares a minimized payload for donation. This offline tour does not open real exports, contact platforms, upload payloads, or retain activity after a page reset. The bytes, hashes, receipts, storage panels, and deletion timelines shown here are simulated or calculated from synthetic data.',

@@ -44,7 +44,7 @@
     sources: {
       title: 'Only what this study allows',
       bullets: [
-        'TikTok and YouTube are required for Round 2. Instagram and Facebook are optional; each source has its own Start, Continue, or Completed status.',
+        'TikTok, YouTube, Instagram and Facebook are all required for Round 2; each source has its own Start, Continue, or Completed status.',
         'Try the research team\'s System page: pausing a service greys its tile here at once.',
       ],
       where: 'shared/src/adapters/registry.ts · server/src/sourceCapabilityControl.ts',
@@ -85,7 +85,7 @@
       title: 'Receipt, and what is next',
       bullets: [
         'The example receipt appears only after the local acceptance simulation finishes.',
-        'This round needs TikTok and YouTube. Instagram and Facebook are optional. This collaborator study is unpaid.',
+        'This round needs TikTok, YouTube, Instagram and Facebook. This collaborator study is unpaid.',
       ],
       where: 'recordCompensationEligibility in server/src/routes/donations.ts',
     },
@@ -661,7 +661,7 @@
     let html = miniHeader() + privacyStatus();
     if (!last) return html + '<h1>No donation in this round yet</h1><button class="btn btn-primary" data-action="p-go" data-step="sources">View this round’s sources</button>';
     html += '<h1>Sample donation complete</h1><p class="lede">' + esc(App.sourceName(last.platform)) + ' · ' + E.formatNumber(last.records) + ' records · ' + esc(S.round.name) + '</p><section class="card"><h2>Your example receipt</h2><p class="receipt-inline">' + esc(last.receiptCode) + '</p><details class="compact-details"><summary>Receipt details</summary><dl class="receipt-list"><dt>Source</dt><dd>' + esc(App.sourceName(last.platform)) + '</dd><dt>Records</dt><dd>' + E.formatNumber(last.records) + '</dd><dt>Collection round</dt><dd>' + esc(S.round.name) + '</dd><dt>Fingerprint</dt><dd>' + esc(E.shortHash(last.sha256, 12, 8)) + '</dd></dl></details></section>';
-    html += missing.length ? '<p class="notice notice-info">Still required: ' + esc(missing.map(App.sourceName).join(', ')) + '.</p>' : '<p class="notice notice-success">Required sources complete. Other sources are optional.</p>';
+    html += missing.length ? '<p class="notice notice-info">Still required: ' + esc(missing.map(App.sourceName).join(', ')) + '.</p>' : '<p class="notice notice-success">All required sources complete. Thank you.</p>';
     html += '<div class="screen-actions"><button class="btn btn-primary" data-action="p-go" data-step="sources">Continue to sources</button><button class="btn btn-secondary" data-action="p-go" data-step="join">Overview and receipts</button><button class="btn btn-ghost" data-action="p-go" data-step="withdraw">Withdrawal options</button></div>';
     return html;
   }

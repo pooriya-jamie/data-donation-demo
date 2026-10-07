@@ -18,8 +18,9 @@ export files, or administrator credentials are included.
 
 - Four steps: **Review and consent → Choose a source → Add your file → Review
   and donate**, followed by a simulated receipt.
-- TikTok and YouTube are required in the round; Instagram and Facebook are
-  optional. Other supported platform capabilities remain outside this study.
+- TikTok, YouTube, Instagram and Facebook are all required in Round 2 under
+  release v4. Earlier releases and earlier-round requirements stay unchanged.
+  Other supported platform capabilities remain outside this study.
 - All study-approved records and available fields start included, across all
   dates. There are no participant field switches, date filters, or bulk removals.
 - **Review or remove individual items** is collapsed initially. Search and
@@ -29,6 +30,8 @@ export files, or administrator credentials are included.
   successful replacement without losing the original choices on failure.
 - Earlier-round receipts do not prevent a fresh donation in Round 2. A duplicate
   in the same round remains blocked.
+- TikTok and YouTube alone do not complete Round 2; Instagram and Facebook
+  must also have accepted donations. Existing accepted donations are preserved.
 
 The simulated source policy includes TikTok watch dates/links; YouTube viewing
 dates, available video links/titles/channel names and post links/labels;

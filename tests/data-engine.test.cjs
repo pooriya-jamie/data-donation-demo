@@ -52,20 +52,22 @@ function loadDemo({ fallback = false } = {}) {
   return { D, E, release, scoped, finalize };
 }
 
-test('default study is release v3 in the existing Round 2, with only TikTok/YouTube required', () => {
+test('default study is release v4 in the existing Round 2, with all four sources required', () => {
   const { D, E, release } = loadDemo();
   assert.equal(D.PROJECTS[0].name, 'Social Media Data Donation');
-  assert.equal(release.version, 3);
+  assert.equal(release.version, 4);
+  assert.equal(release.supersedesReleaseId, 'rel_v3');
+  assert.equal(release.requiresReconsent, true);
   assert.equal(release.participantReviewMode, 'record_exclusions_only');
   assert.equal(release.material.compensation.mode, 'none');
   const round = D.ROUNDS.find((item) => item.status === 'active');
   assert.equal(round.roundKey, 'data-donation-round-2');
   assert.equal(round.projectReleaseId, release.id);
-  assert.deepEqual(clone(round.requiredSourceIds), ['tiktok', 'youtube']);
+  assert.deepEqual(clone(round.requiredSourceIds), ['tiktok', 'youtube', 'instagram', 'facebook']);
   const enabled = release.sourcePolicies.filter((policy) => policy.mode === 'donation');
   assert.deepEqual(clone(enabled.map((policy) => policy.sourceId).sort()), Object.keys(expectedScope).sort());
   for (const policy of enabled) {
-    assert.equal(policy.required, false, 'requirements belong to the existing round');
+    assert.equal(policy.required, false, 'requirements stay scoped to the existing Round 2');
     const descriptors = E.projectCategoryDescriptors(D.CAPABILITIES[policy.sourceId].categories, policy);
     const actual = Object.fromEntries(descriptors.map((category) => [category.id, Array.from(category.fields, (field) => field.id).sort()]));
     assert.deepEqual(clone(actual), expectedScope[policy.sourceId]);
@@ -73,7 +75,20 @@ test('default study is release v3 in the existing Round 2, with only TikTok/YouT
   }
   for (const policy of release.sourcePolicies) {
     assert.equal(E.validateProjectSourcePolicy(policy, policy.sourceId, D.CAPABILITIES[policy.sourceId]?.categories || []).length, 0);
+    if (policy.mode !== 'donation') assert.equal(policy.required, false);
   }
+  assert.equal(round.completed, 0, 'seeded TikTok/YouTube-only donations no longer complete Round 2');
+  assert.equal(round.partial, 7);
+  assert.ok(D.PARTICIPANTS.every((participant) => participant.rounds[round.roundKey] !== 'complete'));
+  assert.deepEqual(clone(D.ROUNDS.find((item) => item.id === 'rnd_w1').requiredSourceIds), []);
+  for (const earlier of D.RELEASES.filter((item) => item.version < 4)) {
+    assert.ok(earlier.sourcePolicies.every((policy) => !policy.required), 'published historical policies stay unchanged');
+  }
+  const earlier = D.RELEASES.find((item) => item.id === 'rel_v3');
+  assert.deepEqual(clone(release.sourcePolicies), clone(earlier.sourcePolicies), 'the new release does not broaden project-wide requirements');
+  assert.match(earlier.participantDataScopeNotice, /Instagram and Facebook are optional/);
+  assert.match(release.participantDataScopeNotice, /TikTok, YouTube, Instagram and Facebook are all required/);
+  assert.notEqual(earlier.consentVersion, release.consentVersion);
 });
 
 test('past donations and release-specific consent are synthetic history, not Round 2 completion', () => {
@@ -121,7 +136,7 @@ test('record-only policy includes every approved field and every available date'
     assert.equal(result.counts.totalSelected, extraction.records.length);
     assert.equal(result.counts.totalParticipantExcluded, 0);
     assert.ok(result.payload.records.some((record) => record.timestamp === extraction.records[0].timestamp));
-    assert.equal(result.manifest.projectReleaseId, 'rel_v3');
+    assert.equal(result.manifest.projectReleaseId, 'rel_v4');
     assert.equal(result.manifest.collectionRoundId, 'rnd_w2');
     assert.equal(Object.hasOwn(result.manifest, 'participantExcludedTotal'), false);
   }
@@ -282,6 +297,8 @@ test('demo acknowledgment is unpaid and fictional, with scroll/signature but no 
   assert.match(text, /unpaid/);
   assert.match(text, /All available dates/);
   assert.match(text, /Missing values remain absent/);
+  assert.match(text, /TikTok, YouTube, Instagram and Facebook are all required/);
+  assert.doesNotMatch(text, /Optional Instagram|Optional Facebook|Instagram and Facebook are optional/);
   assert.doesNotMatch(text, /USD 20|wellbeing|OASIS Lab|agree to take part/);
 });
 

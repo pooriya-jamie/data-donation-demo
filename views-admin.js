@@ -248,7 +248,7 @@
     const material = changes.some((c) => c.material);
     const warnings = [];
     const roundRequired = S.round.requiredSourceIds.filter((id) => !rel.sourcePolicies.find((p) => p.sourceId === id && p.required));
-    if (roundRequired.length) warnings.push({ title: S.round.name + ' requirements', detail: 'Required: ' + App.requiredSourceIds().map(App.sourceName).join(' + ') + '. Instagram and Facebook optional. Unpaid.' });
+    if (roundRequired.length) warnings.push({ title: S.round.name + ' requirements', detail: 'Required: ' + App.requiredSourceIds().map(App.sourceName).join(' + ') + '. Unpaid.' });
     Object.keys(S.catalog.suspended).forEach((id) => warnings.push({ title: App.sourceName(id) + ' uploads paused', detail: 'Publishing will not restore uploads; an owner must do so.' }));
     if (material) warnings.push({ title: 'Material change: every active participant must re-consent', detail: reconsentPending().length + ' already need it from v' + rel.version + '; ' + A.participants.filter((p) => p.status === 'active' && p.consentVersion === rel.consentVersion).length + ' more will after v' + nextVersion + '.' });
     const ready = changes.length > 0;
@@ -287,7 +287,7 @@
       const states = A.participants.map((p) => participantRoundStatus(p, r));
       return '<tr><td><strong>' + esc(r.name) + '</strong>' + details('Dates & eligibility', '<dl class="admin-definition-list"><dt>Round key</dt><dd>' + esc(r.roundKey) + '</dd><dt>Opens</dt><dd>' + esc(E.formatDate(r.startsAt)) + '</dd><dt>Donations close</dt><dd>' + esc(E.formatDate(r.donationsCloseAt)) + '</dd><dt>Access ends</dt><dd>' + esc(E.formatDate(r.participantAccessEndsAt)) + '</dd><dt>Eligibility</dt><dd>' + esc(r.eligibilityMode.replace(/_/g, ' ')) + '</dd></dl>') + '</td><td>' + esc(required.map(App.sourceName).join(' + ') || 'None') + '</td><td>' + states.filter((state) => state === 'complete').length + '</td><td>' + states.filter((state) => state === 'partial').length + '</td><td>' + acceptedDonations(r.roundKey).length + '</td><td>' + badge(r.status) + '</td></tr>';
     }).join('') + '</tbody></table></div>';
-    return pageHeader(project().name, 'Collection rounds', 'Progress is separate for each round.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-not-in-tour">New round</button>') + panel('Rounds', null, list, 'flag') + '<div class="notice notice-info">' + icon('info') + '<p>Instagram and Facebook are optional. Participation is unpaid; skips do not count.</p></div>' + details('How rounds work', '<p>A donation in an earlier round does not block one in the current open round. Optional sources remain available after the required donations are complete.</p>');
+    return pageHeader(project().name, 'Collection rounds', 'Progress is separate for each round.', '<button type="button" class="btn btn-primary btn-sm" data-action="a-not-in-tour">New round</button>') + panel('Rounds', null, list, 'flag') + '<div class="notice notice-info">' + icon('info') + '<p>All four sources are required in Round 2. Participation is unpaid; skips do not count.</p></div>' + details('How rounds work', '<p>A donation in an earlier round does not block one in the current open round. Earlier-round requirements and receipts stay unchanged.</p>');
   }
 
   function screenWithdrawals() {
