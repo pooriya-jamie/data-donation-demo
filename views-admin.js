@@ -341,11 +341,11 @@
 
   function screenAdministrators() {
     const rows = D.ADMINS.map((a) => '<tr><td><strong>' + esc(a.displayName) + '</strong><div class="xs admin-mono muted">' + esc(a.username) + '</div></td><td>' + esc(a.role) + '</td><td>' + badge(a.status) + '</td><td>' + esc(E.formatDateTime(a.lastSeen)) + '</td></tr>').join('');
-    return pageHeader('Umbrella', 'Administrators', 'Named staff accounts with three roles: owner, manager, viewer. Sensitive actions ask for the password again. Every administrator can see every study.') + panel('Accounts', null, '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Administrator</th><th>Role</th><th>Status</th><th>Last seen</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'users');
+    return pageHeader('Umbrella', 'Administrators', 'All administrators can see every study.') + panel('Accounts', null, '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Administrator</th><th>Role</th><th>Status</th><th>Last seen</th></tr></thead><tbody>' + rows + '</tbody></table></div>', 'users');
   }
 
   function screenAccount() {
-    return pageHeader('Umbrella', 'Account & security', 'Your administrator identity, recovery codes and step-up state.') + panel('Step-up authentication', 'Sensitive actions (publish, suspend, downloads, deletion approvals) require re-authentication within 5 minutes.', '<p class="step-up-note ' + (stepUpFresh() ? 'is-fresh' : '') + '" style="font-size:var(--font-size-sm)">' + icon('key', 'ico-sm') + (stepUpFresh() ? 'Verified until ' + esc(new Date(A.stepUpUntil).toLocaleTimeString()) : 'Not currently verified') + '</p><div class="btn-row"><button type="button" class="btn btn-secondary btn-sm" data-action="a-stepup">Re-authenticate now</button></div>', 'shield-check') + panel('Session', null, '<dl class="admin-definition-list"><dt>Signed in as</dt><dd>' + esc(A.user.displayName) + ' (' + esc(A.user.username) + ')</dd><dt>Role</dt><dd>' + esc(A.user.role) + '</dd><dt>Idle timeout</dt><dd>15 minutes · absolute 8 hours</dd><dt>Cookie</dt><dd>HttpOnly · Secure · SameSite=Strict</dd></dl>', 'user-circle');
+    return pageHeader('Umbrella', 'Account & security', null) + panel('Step-up authentication', 'Verification lasts 5 minutes.', '<p class="step-up-note ' + (stepUpFresh() ? 'is-fresh' : '') + '" style="font-size:var(--font-size-sm)">' + icon('key', 'ico-sm') + (stepUpFresh() ? 'Verified until ' + esc(new Date(A.stepUpUntil).toLocaleTimeString()) : 'Not currently verified') + '</p><div class="btn-row"><button type="button" class="btn btn-secondary btn-sm" data-action="a-stepup">Re-authenticate now</button></div>', 'shield-check') + panel('Session', null, '<dl class="admin-definition-list"><dt>Signed in as</dt><dd>' + esc(A.user.displayName) + ' (' + esc(A.user.username) + ')</dd><dt>Role</dt><dd>' + esc(A.user.role) + '</dd></dl>' + details('Security rules', '<p>Publishing, source suspension, downloads and deletion approvals require recent verification.</p><dl class="admin-definition-list"><dt>Idle timeout</dt><dd>15 minutes · absolute 8 hours</dd><dt>Cookie</dt><dd>HttpOnly · Secure · SameSite=Strict</dd></dl>'), 'user-circle');
   }
 
   function screenFeedback() {
@@ -354,12 +354,12 @@
       { rating: 4, screen: 'Add your file', comment: 'Took me a minute to find the ZIP in Downloads; the file name hint helped.', status: 'unreviewed' },
       { rating: 4, screen: 'Review your donation', comment: 'The fingerprint idea is reassuring even if I do not fully get it.', status: 'unreviewed' },
     ];
-    return pageHeader(project().name, 'Feedback', STUBS.feedback[1]) + panel('Recent feedback', null, '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Rating</th><th>Screen</th><th>Comment</th><th>Status</th></tr></thead><tbody>' + entries.map((e) => '<tr><td>' + '★'.repeat(e.rating) + '</td><td>' + esc(e.screen) + '</td><td>' + esc(e.comment) + '</td><td>' + badge(e.status) + '</td></tr>').join('') + '</tbody></table></div>', 'chat');
+    return pageHeader(project().name, 'Feedback', null) + panel('Recent feedback', null, '<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Rating</th><th>Screen</th><th>Comment</th><th>Status</th></tr></thead><tbody>' + entries.map((e) => '<tr><td>' + '★'.repeat(e.rating) + '</td><td>' + esc(e.screen) + '</td><td>' + esc(e.comment) + '</td><td>' + badge(e.status) + '</td></tr>').join('') + '</tbody></table></div>', 'chat');
   }
 
   function screenStub(id) {
     const [title, description] = STUBS[id];
-    return pageHeader(project().name, title, description) + '<section class="admin-panel"><div class="admin-state"><span class="admin-empty-icon">' + icon('info') + '</span><br />This screen is not part of the tour.<br /><span class="xs">It exists in the product with the description above.</span></div></section>';
+    return pageHeader(project().name, title, null) + '<section class="admin-panel"><div class="admin-state"><span class="admin-empty-icon">' + icon('info') + '</span><p>Not available in this demo.</p></div>' + details('About ' + title.toLowerCase(), '<p>' + esc(description) + '</p>') + '</section>';
   }
 
   const SCREENS = { projects: screenProjects, overview: screenOverview, donations: screenDonations, release: screenRelease, system: screenSystem, rounds: screenRounds, withdrawals: screenWithdrawals, participants: screenParticipants, audit: screenAudit, sources: screenSources, administrators: screenAdministrators, account: screenAccount, feedback: screenFeedback };
@@ -374,7 +374,7 @@
       '<div style="grid-column:1/-1;display:contents"><div class="admin-mobile-header"><button type="button" class="icon-btn" aria-label="Open administrator navigation" aria-expanded="' + A.navOpen + '" data-action="a-nav-toggle">' + icon('list') + '</button><span><strong>DataDonate</strong><small>Administration</small></span></div></div>' +
       '<button type="button" class="admin-nav-scrim" aria-label="Close administrator navigation" data-action="a-nav-toggle"></button>' +
       sidebar() +
-      '<main class="admin-main" id="admin-main"><p class="xs muted">Offline simulation · fictional accounts and records · no real authentication, uploads, emails or administrative changes.</p>' + body + '</main>';
+      '<main class="admin-main" id="admin-main"><p class="xs muted">Offline demo · fictional data · no real accounts, uploads, emails or changes.</p>' + body + '</main>';
     App.syncHash('admin', A.screen);
     if (opts && opts.focus) {
       const h1 = shell.querySelector('.admin-main h1');
